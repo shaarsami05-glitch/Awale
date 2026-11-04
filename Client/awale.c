@@ -3,18 +3,21 @@
 // int nord[6] = [4,4,4,4,4,4];
 // int sud[6] = [4,4,4,4,4,4];
 
-// int joueur = 0 ou 1;
+// int joueur = 0  => NORD;
+// int joueur = 1  => SUD;
 
 struct plateau
 {
     int *nord;
     int *sud;
+    int scoreNord;
+    int scoreSud;
 };
 
 int *convertis(char *lettre)
 {
 
-    printf("Appel convertis\n");
+    //printf("Appel convertis\n");
     int *res;
     switch (*lettre)
     {
@@ -72,7 +75,7 @@ int *convertis(char *lettre)
 
 int *concat(int *a, int *b)
 {
-    int* res;
+    int *res;
     for (int i = 0; i < 6; i++)
     {
         res[i] = a[i];
@@ -87,7 +90,9 @@ int *concat(int *a, int *b)
 void afficherJeu(struct plateau plateau)
 {
 
-    printf("f  e  d  c  b  a \n");
+    printf("------------ PLATEAU ------------\n");
+
+    printf("f e d c b a \n");
     for (int i = 0; i < 6; i++)
     {
         printf("%d ", plateau.nord[5 - i]);
@@ -97,15 +102,24 @@ void afficherJeu(struct plateau plateau)
     {
         printf("%d ", plateau.sud[j]);
     }
-    printf("\nA  B  C  D  E  F  \n");
+    printf("\nA B C D E F\n");
+    printf("-------------------------------\n");
 }
 
-struct plateau deplacerGraines(char *coupJoue, struct plateau plateau)
+void afficherScore(struct plateau plateau)
+{
+    printf("------------ SCORE ------------\n");
+    printf("Joueur 0 (NORD) : %d\n", plateau.scoreNord);
+    printf("Joueur 1 (SUD) : %d\n", plateau.scoreSud);
+    printf("-------------------------------\n");
+}
+
+struct plateau deplacerGraines(char coupJoue, struct plateau plateau)
 // Ne jamais metttre de graines dans la case jouée
 {
-    printf("Appel deplacerGraines \n");
+    //printf("Appel deplacerGraines \n");
 
-    int *coordonnees = convertis(coupJoue);
+    int *coordonnees = convertis(&coupJoue);
 
     int *nord = plateau.nord;
     int *sud = plateau.sud;
@@ -120,8 +134,6 @@ struct plateau deplacerGraines(char *coupJoue, struct plateau plateau)
         sud[coordonnees[1]] = 0;
         while (nbGraines > 0)
         {
-            printf("%d\n", i);
-
             if (i < 6 && i != coordonnees[1])
             {
                 sud[i]++;
@@ -130,13 +142,26 @@ struct plateau deplacerGraines(char *coupJoue, struct plateau plateau)
 
             if (i >= 6)
             {
-                nord[i%6]++;
+                nord[i % 6]++;
                 nbGraines--;
             }
 
             i = ++i % 12;
         }
+
+        //  Tant que les cases du joueur adverse contiennent 2 ou 3 graines :
+        printf("i avant : %d\n", i);
+        if(i == 0){
+            i = 12;
+        }
+        while (--i >= 6 && (nord[i % 6] == 2 || nord[i % 6] == 3))
+        {
+            printf("i while : %d\n", i);
+            plateau.scoreSud += nord[i % 6];
+            nord[i % 6] = 0;
+        }
     }
+
     // Joueur Nord
     else
     {
@@ -145,7 +170,6 @@ struct plateau deplacerGraines(char *coupJoue, struct plateau plateau)
         nord[coordonnees[1]] = 0;
         while (nbGraines > 0)
         {
-            printf("%d\n", i);
             if (i < 6 && i != coordonnees[1])
             {
                 nord[i]++;
@@ -154,11 +178,21 @@ struct plateau deplacerGraines(char *coupJoue, struct plateau plateau)
 
             if (i >= 6)
             {
-                sud[i%6]++;
+                sud[i % 6]++;
                 nbGraines--;
             }
-
             i = ++i % 12;
+        }
+
+         if(i == 0){
+            i = 12;
+        }
+
+        //  Tant que les cases du joueur adverse contiennent 2 ou 3 graines :
+        while (--i >= 6 && (sud[i % 6] == 2 || sud[i % 6] == 3))
+        {
+            plateau.scoreNord += sud[i % 6];
+            sud[i % 6] = 0;
         }
     }
 
@@ -167,24 +201,31 @@ struct plateau deplacerGraines(char *coupJoue, struct plateau plateau)
 
 int main()
 {
-    //int estTermine = 0;
+    int estTermine = 0;
     int i = 0;
 
-    int nord[6] = {4, 4, 4, 4, 4, 4};
-    int sud[6] = {4, 4, 4, 4, 4, 4};
+    int nord[6] = {2, 1, 2, 1, 1, 4};
+    int sud[6] = {4, 4, 4, 4, 4, 2};
+    int scoreNord = 0;
+    int scoreSud = 20;
 
-    struct plateau plateau = {nord, sud};
+    struct plateau plateau = {nord, sud, scoreNord, scoreSud};
     afficherJeu(plateau);
 
-    while (i++ < 100)
+    while (!estTermine && i++ < 100)
     {
         char lettreJouee;
         printf("Joueur %d : ", i % 2);
         scanf(" %c", &lettreJouee);
         printf("\n");
-        plateau = deplacerGraines(&lettreJouee, plateau);
+        plateau = deplacerGraines(lettreJouee, plateau);
         afficherJeu(plateau);
-        printf("%d\n", i);
+        afficherScore(plateau);
+        if (plateau.scoreNord > 24 || plateau.scoreSud > 24)
+        {
+            estTermine = 1;
+            printf("Partie terminee \n");
+        }
     }
 
     return 0;
