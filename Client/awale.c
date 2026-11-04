@@ -204,10 +204,10 @@ int main()
     int estTermine = 0;
     int i = 0;
 
-    int nord[6] = {2, 1, 2, 1, 1, 4};
-    int sud[6] = {4, 4, 4, 4, 4, 2};
+    int nord[6] = {4, 4, 4, 4, 4, 4};
+    int sud[6] = {4, 4, 4, 4, 4, 4};
     int scoreNord = 0;
-    int scoreSud = 20;
+    int scoreSud = 0;
 
     struct plateau plateau = {nord, sud, scoreNord, scoreSud};
     afficherJeu(plateau);
@@ -218,6 +218,10 @@ int main()
         printf("Joueur %d : ", i % 2);
         scanf(" %c", &lettreJouee);
         printf("\n");
+        // Vérifier coups légaux :
+        // lettreJouee est [A , F] union [a, f] et est unique (un seul caractère)
+        // Chaque joueur joue sa propre lettre
+        // Prévenir la famine (= obligé de nourrir son adversaire => si toutes les cases adverses sont vides, obligé de le nourrir)
         plateau = deplacerGraines(lettreJouee, plateau);
         afficherJeu(plateau);
         afficherScore(plateau);
