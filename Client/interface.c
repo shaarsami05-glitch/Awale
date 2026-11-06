@@ -1,17 +1,23 @@
 #include <stdio.h>
+#include "interface.h"
+#include "awale.h"
 
-int connecte = 0;
 // char interligne[30] = " ============================== ";
 
-
-void afficherAuthentification(int choix)
+void afficherAuthentification()
 {
+    int choix;
+    printf("1. Se connecter\n");
+    printf("2. S'inscrire\n");
+    scanf(" %d", &choix);
+
     if (choix == 1)
     {
-        char *nomUtilisateur;
+        char nomUtilisateur[10];
         printf("============ CONNEXION ============\n");
-        printf("Entrez votre nom d'utilisateur :");
+        printf("Entrez votre nom d'utilisateur : ");
         scanf(" %s", nomUtilisateur);
+        printf("%s\n", nomUtilisateur);
         // Chercher si correspond à un user
         int connecte = 0;
         if (connecte)
@@ -27,10 +33,11 @@ void afficherAuthentification(int choix)
     }
     else if (choix == 2)
     {
-        char *nomUtilisateur;
+        char nomUtilisateur[10];
         printf("============ INSCRIPTION ============\n");
-        printf("Entrez votre nom d'utilisateur :");
+        printf("Entrez votre nom d'utilisateur : ");
         scanf(" %s", nomUtilisateur);
+        printf("%s\n", nomUtilisateur);
         // Cherche si déjà existant
         int existeDeja = 0;
         if (existeDeja)
@@ -40,15 +47,41 @@ void afficherAuthentification(int choix)
         }
         else
         {
-            printf(" Inscription validee\n");
+            printf("Inscription validee\n");
             afficherMenu(1);
         }
     }
-    else{
+    else
+    {
         printf("Erreur d'entree\n");
         afficherMenu(0);
     }
-} 
+}
+
+void afficherMenuConnecte()
+{
+    printf("1. Jouer\n");
+    printf("2. Voir parties en cours\n");
+    printf("3. Voir liste utilisateurs\n");
+    printf("4. Se deconnecter\n");
+    int choix;
+    scanf(" %d", &choix);
+    switch (choix)
+    {
+    case 1:
+        lancerJeu();
+        break;
+    case 2:
+        lancerJeu();
+        break;
+    case 3:
+        lancerJeu();
+        break;
+    case 4:
+        afficherMenu(0);
+        break;
+    }
+}
 
 void afficherMenu(int menu)
 {
@@ -56,20 +89,14 @@ void afficherMenu(int menu)
     switch (menu)
     {
     case 0:
-        int choix;
-        printf("1. Se connecter\n");
-        printf("2. S'inscrire\n");
-        scanf(" %d", &choix);
-        afficherAuthentification(choix);
+        afficherAuthentification();
+        break;
     case 1:
-        printf("1. Jouer\n");
-        printf("2. Voir parties en cours\n");
-        printf("3. Voir liste utilisateurs\n");
-        printf("4. Se déconnecter\n");
+        afficherMenuConnecte();
+        break;
     }
     printf("==============================\n");
 }
-
 
 
 int main()

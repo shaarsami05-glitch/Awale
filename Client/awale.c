@@ -1,18 +1,11 @@
 #include <stdio.h>
+#include "awale.h"
 
 // int nord[6] = [4,4,4,4,4,4];
 // int sud[6] = [4,4,4,4,4,4];
 
 // int joueur = 0  => NORD;
 // int joueur = 1  => SUD;
-
-struct plateau
-{
-    int nord[6];
-    int sud[6];
-    int scoreNord;
-    int scoreSud;
-};
 
 int *convertis(char *lettre)
 {
@@ -77,7 +70,7 @@ int *convertis(char *lettre)
     return res;
 }
 
-void afficherJeu(struct plateau plateau)
+void afficherJeu(Plateau plateau)
 {
 
     printf("------------ PLATEAU ------------\n");
@@ -96,7 +89,7 @@ void afficherJeu(struct plateau plateau)
     printf("-------------------------------\n");
 }
 
-void afficherScore(struct plateau plateau)
+void afficherScore(Plateau plateau)
 {
     printf("------------ SCORE ------------\n");
     printf("Joueur 0 (NORD) : %d\n", plateau.scoreNord);
@@ -104,10 +97,10 @@ void afficherScore(struct plateau plateau)
     printf("-------------------------------\n");
 }
 
-struct plateau deplacerGraines(int *coordonnees, struct plateau plateau)
+Plateau deplacerGraines(int *coordonnees, Plateau plateau)
 // Ne jamais metttre de graines dans la case jouée
 {
-    //printf("Appel deplacerGraines \n");
+    // printf("Appel deplacerGraines \n");
 
     // int *coordonnees = convertis(&coupJoue);
 
@@ -190,7 +183,7 @@ struct plateau deplacerGraines(int *coordonnees, struct plateau plateau)
     return plateau;
 }
 
-int estAffame(struct plateau plateau, int joueur)
+int estAffame(Plateau plateau, int joueur)
 {
     // Vérifie que le coup n'a pas affamé l'adversaire
     // Renvoie 1 si tout le camp de l'adversaire est vide
@@ -220,13 +213,13 @@ int estAffame(struct plateau plateau, int joueur)
     }
 }
 
-void nourrirAdversaire(struct plateau plateau, int joueur)
+void nourrirAdversaire(Plateau plateau, int joueur)
 {
     // Si plus aucun coup n'est possible, la partie se termine
     int coupImpossible = 1;
     int i = 0;
 
-    struct plateau copiePlateau = plateau;
+    Plateau copiePlateau = plateau;
 
     while (coupImpossible && i++ < 6)
     {
@@ -251,7 +244,7 @@ void nourrirAdversaire(struct plateau plateau, int joueur)
     }
 }
 
-int main()
+void lancerJeu()
 {
     int estTermine = 0;
     int i = 0;
@@ -260,9 +253,9 @@ int main()
     // int sud[6] = {4, 4, 4, 4, 4, 1};
     // int scoreNord = 0;
     // int scoreSud = 0;
-    // struct plateau plateau = {nord, sud, scoreNord, scoreSud};
+    // Plateau plateau = {nord, sud, scoreNord, scoreSud};
 
-    struct plateau plateau;
+    Plateau plateau;
     for (int k = 0; k < 6; k++)
     {
         plateau.nord[k] = 1;
@@ -326,7 +319,7 @@ int main()
         }
         printf("plateau\n");
 
-        struct plateau sauvegardePlateau = plateau;
+        Plateau sauvegardePlateau = plateau;
 
         plateau = deplacerGraines(coordonnees, plateau);
 
@@ -345,6 +338,10 @@ int main()
             printf("Partie terminee \n");
         }
     }
+}
 
+int main()
+{
+    lancerJeu();
     return 0;
 }
