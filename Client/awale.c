@@ -8,8 +8,8 @@
 
 struct plateau
 {
-    int *nord;
-    int *sud;
+    int nord[6];
+    int sud[6];
     int scoreNord;
     int scoreSud;
 };
@@ -17,7 +17,7 @@ struct plateau
 int *convertis(char *lettre)
 {
 
-    //printf("Appel convertis\n");
+    // printf("Appel convertis\n");
     int *res;
     switch (*lettre)
     {
@@ -69,21 +69,11 @@ int *convertis(char *lettre)
         res[0] = 1;
         res[1] = 5;
         break;
-    }
-    return res;
-}
 
-int *concat(int *a, int *b)
-{
-    int *res;
-    for (int i = 0; i < 6; i++)
-    {
-        res[i] = a[i];
+    default:
+        res[0] = 2;
     }
-    for (int i = 6; i < 12; i++)
-    {
-        res[i] = b[i];
-    }
+
     return res;
 }
 
@@ -114,12 +104,12 @@ void afficherScore(struct plateau plateau)
     printf("-------------------------------\n");
 }
 
-struct plateau deplacerGraines(char coupJoue, struct plateau plateau)
+struct plateau deplacerGraines(int *coordonnees, struct plateau plateau)
 // Ne jamais metttre de graines dans la case jouée
 {
     //printf("Appel deplacerGraines \n");
 
-    int *coordonnees = convertis(&coupJoue);
+    // int *coordonnees = convertis(&coupJoue);
 
     int *nord = plateau.nord;
     int *sud = plateau.sud;
@@ -150,13 +140,13 @@ struct plateau deplacerGraines(char coupJoue, struct plateau plateau)
         }
 
         //  Tant que les cases du joueur adverse contiennent 2 ou 3 graines :
-        printf("i avant : %d\n", i);
-        if(i == 0){
+        // printf("i avant : %d\n", i);
+        if (i == 0)
+        {
             i = 12;
         }
         while (--i >= 6 && (nord[i % 6] == 2 || nord[i % 6] == 3))
         {
-            printf("i while : %d\n", i);
             plateau.scoreSud += nord[i % 6];
             nord[i % 6] = 0;
         }
@@ -184,7 +174,8 @@ struct plateau deplacerGraines(char coupJoue, struct plateau plateau)
             i = ++i % 12;
         }
 
-         if(i == 0){
+        if (i == 0)
+        {
             i = 12;
         }
 
@@ -199,30 +190,153 @@ struct plateau deplacerGraines(char coupJoue, struct plateau plateau)
     return plateau;
 }
 
+int estAffame(struct plateau plateau, int joueur)
+{
+    // Vérifie que le coup n'a pas affamé l'adversaire
+    // Renvoie 1 si tout le camp de l'adversaire est vide
+    int estVide = 1;
+    int i = 0;
+    if (joueur) // SUD
+    {
+        while (estVide && i < 6)
+        {
+            if (plateau.nord[i++] != 0)
+            {
+                estVide = 0;
+            }
+        }
+        return estVide;
+    }
+    else
+    { // NORD
+        while (estVide && i < 6)
+        {
+            if (plateau.sud[i++] != 0)
+            {
+                estVide = 0;
+            }
+        }
+        return estVide;
+    }
+}
+
+void nourrirAdversaire(struct plateau plateau, int joueur)
+{
+    // Si plus aucun coup n'est possible, la partie se termine
+    int coupImpossible = 1;
+    int i = 0;
+
+    struct plateau copiePlateau = plateau;
+
+    while (coupImpossible && i++ < 6)
+    {
+        int coord[2] = {joueur, i};
+        copiePlateau = deplacerGraines(coord, copiePlateau);
+        if (!estAffame(copiePlateau, joueur))
+        {
+            coupImpossible = 0;
+        }
+        copiePlateau = plateau;
+    }
+
+    if (coupImpossible)
+    {
+        // Partie s'arrete
+        printf("coupImpossible");
+        for (int j = 0; j < 6; j++)
+        {
+            plateau.scoreSud += plateau.sud[j];
+            plateau.scoreNord += plateau.nord[j];
+        }
+    }
+}
+
 int main()
 {
     int estTermine = 0;
     int i = 0;
 
-    int nord[6] = {4, 4, 4, 4, 4, 4};
-    int sud[6] = {4, 4, 4, 4, 4, 4};
-    int scoreNord = 0;
-    int scoreSud = 0;
+    // int nord[6] = {1, 0, 0, 0, 0, 0};
+    // int sud[6] = {4, 4, 4, 4, 4, 1};
+    // int scoreNord = 0;
+    // int scoreSud = 0;
+    // struct plateau plateau = {nord, sud, scoreNord, scoreSud};
 
-    struct plateau plateau = {nord, sud, scoreNord, scoreSud};
+    struct plateau plateau;
+    for (int k = 0; k < 6; k++)
+    {
+        plateau.nord[k] = 1;
+        plateau.sud[k] = 2;
+    }
+    plateau.scoreNord = 15;
+    plateau.scoreSud = 15;
+
     afficherJeu(plateau);
+
+    char ligne[10];
 
     while (!estTermine && i++ < 100)
     {
-        char lettreJouee;
-        printf("Joueur %d : ", i % 2);
-        scanf(" %c", &lettreJouee);
-        printf("\n");
-        // Vérifier coups légaux :
-        // lettreJouee est [A , F] union [a, f] et est unique (un seul caractère)
-        // Chaque joueur joue sa propre lettre
+        // Si un joueur n'a plus de billes dans son camp, l'autre s'empare des dernieres graines
+        nourrirAdversaire(plateau, i % 2);
+
+        int estValide = 0;
+        int *coordonnees;
+        while (!estValide)
+        {
+            // Vérifier coups légaux :
+            printf("Joueur %d : ", i % 2);
+            if (!fgets(ligne, sizeof ligne, stdin))
+                continue;
+            printf("%c\n", ligne[0]);
+
+            // Une seule lettre
+            if (ligne[1] != '\n')
+            {
+                printf("Ecrire une seule lettre svp \n");
+            }
+            else
+            {
+                printf("else \n");
+                // lettreJouee est [A , F] union [a, f]
+                coordonnees = convertis(&ligne[0]);
+
+                // Chaque joueur joue sa propre lettre
+                if (coordonnees[0] == i % 2) // Nord = 0 et Sud = 1 (SUD commence)
+                {
+                    // Verifier case non vide
+                    if (coordonnees[0] && plateau.sud[coordonnees[1]] != 0)
+                    {
+                        estValide = 1;
+                    }
+                    else if (!coordonnees[0] && plateau.nord[coordonnees[1]] != 0)
+                    {
+                        estValide = 1;
+                    }
+                    else
+                    {
+                        printf("Case vide. Veuillez rejouer\n");
+                    }
+                }
+                else
+                {
+                    printf("Coup invalide veuillez rejouer\n");
+                }
+            }
+        }
+        printf("plateau\n");
+
+        struct plateau sauvegardePlateau = plateau;
+
+        plateau = deplacerGraines(coordonnees, plateau);
+
         // Prévenir la famine (= obligé de nourrir son adversaire => si toutes les cases adverses sont vides, obligé de le nourrir)
-        plateau = deplacerGraines(lettreJouee, plateau);
+        if (estAffame(plateau, i % 2))
+        {
+            // Restaurer le plateau
+            plateau = sauvegardePlateau;
+            i--;
+        }
         afficherJeu(plateau);
         afficherScore(plateau);
         if (plateau.scoreNord > 24 || plateau.scoreSud > 24)
