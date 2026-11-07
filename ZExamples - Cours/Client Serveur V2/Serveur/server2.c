@@ -173,6 +173,7 @@ void traiter_menu(Client *client, char *buffer)
       client->etat = CHOIX_ADVERSAIRE;
       strcpy(buffer, "Choisissez un adversaire.");
       write_client(client->sock, buffer);
+      
    }
    else if (strcmp(buffer, "2") == 0)
    {

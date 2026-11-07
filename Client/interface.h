@@ -4,6 +4,6 @@
 #include "../Serveur/awale.h"
 
 void afficherAuthentification();
-void afficherMenu(int menu);
+void afficherMenu(int menu, SOCKET sock);
 
 #endif

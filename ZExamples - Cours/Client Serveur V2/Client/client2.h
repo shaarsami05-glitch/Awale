@@ -31,6 +31,7 @@ typedef struct in_addr IN_ADDR;
 #define PORT     1977
 
 #define BUF_SIZE 1024
+//#include "../../../Client/interface.h"
 
 static void init(void);
 static void end(void);
@@ -39,5 +40,6 @@ static int init_connection(const char *address);
 static void end_connection(int sock);
 static int read_server(SOCKET sock, char *buffer);
 static void write_server(SOCKET sock, const char *buffer);
+void afficherMenu(int menu, SOCKET sock);
 
 #endif /* guard */
