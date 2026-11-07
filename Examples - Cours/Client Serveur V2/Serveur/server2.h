@@ -45,5 +45,8 @@ static void write_client(SOCKET sock, const char *buffer);
 static void send_message_to_all_clients(Client *clients, Client client, int actual, const char *buffer, char from_server);
 static void remove_client(Client *clients, int to_remove, int *actual);
 static void clear_clients(Client *clients, int actual);
+void traiter_message(Client clients[], int actual, int indice, char *buffer);
+void traiter_menu(Client *client, char *buffer);
+void traitement_en_cours(void);
 
 #endif /* guard */

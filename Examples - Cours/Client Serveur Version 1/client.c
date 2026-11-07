@@ -13,13 +13,14 @@ int main(int argc, char const* argv[])
 	char* hello = "Hello from client"; /* message à envoyer */
 	char buffer[1024] = { 0 };         /* initialisation à un string vide */
 
+	// création de la socket et gestion d'erreur si échec
 	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 		printf("\n Socket creation error \n");
 		return -1;
 	}
 
-	serv_addr.sin_family = AF_INET;
-	serv_addr.sin_port = htons(PORT);
+	serv_addr.sin_family = AF_INET; // on utilise des adresses IPv4
+	serv_addr.sin_port = htons(PORT); // conversion du port en format réseau (big-endian)
 
 	// Convertion  d'adresse IPv4 et IPv6 à partir d'un text
 	// Il faut tout faire "à la main" seul des char sont transférés sur le réseau

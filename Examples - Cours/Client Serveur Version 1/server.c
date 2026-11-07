@@ -23,6 +23,7 @@ int main(int argc, char const* argv[])
 	}
 
 	// Attacher la socket sur le port 8080
+	// configuration de la socket pour réutiliser l'adresse et le port
 	if (setsockopt(server_fd, SOL_SOCKET,
 				SO_REUSEADDR | SO_REUSEPORT, &opt,
 				sizeof(opt))) {
@@ -35,13 +36,14 @@ int main(int argc, char const* argv[])
 	address.sin_port = htons(PORT);
 
 	// Attacher la socket entrante au port 8080
+	// association de l'adresse et du port à la socket
 	if (bind(server_fd, (struct sockaddr*)&address,
 			sizeof(address))
 		< 0) {
 		perror("bind failed");
 		exit(EXIT_FAILURE);
 	}
-	if (listen(server_fd, 3) < 0) {
+	if (listen(server_fd, 3) < 0) { // le 3 est la taille max de la file d'attente des connexions entrantes
 		perror("listen");
 		exit(EXIT_FAILURE);
 	}
