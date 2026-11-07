@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include "interface.h"
-#include "awale.h"
 
 // char interligne[30] = " ============================== ";
 
@@ -58,6 +57,20 @@ void afficherAuthentification()
     }
 }
 
+void afficherUtilisateurs()
+{
+    // affiche la liste des utilisateurs
+    // 1. Bob
+    // 2. Alice
+    printf("======== UTILISATEURS ========\n");
+    char *listeUsers[2] = {"sami", "clemence"};
+    int n = 2;
+    for (int i = 0; i < n; i++)
+    {
+        printf("%d. %s\n", i + 1, listeUsers[i]);
+    }
+}
+
 void afficherMenuConnecte()
 {
     printf("1. Jouer\n");
@@ -75,7 +88,7 @@ void afficherMenuConnecte()
         lancerJeu();
         break;
     case 3:
-        lancerJeu();
+        afficherUtilisateurs();
         break;
     case 4:
         afficherMenu(0);
@@ -97,7 +110,6 @@ void afficherMenu(int menu)
     }
     printf("==============================\n");
 }
-
 
 int main()
 {

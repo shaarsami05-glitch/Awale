@@ -1,3 +1,5 @@
+#ifndef AWALE_H
+#define AWALE_H
 
 typedef struct 
 {
@@ -14,3 +16,5 @@ Plateau deplacerGraines(int *coordonnees, Plateau plateau);
 int estAffame(Plateau plateau, int joueur);
 void nourrirAdversaire(Plateau plateau, int joueur);
 void lancerJeu();
+
+#endif

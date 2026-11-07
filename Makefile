@@ -1,7 +1,7 @@
 CC     = gcc
 CFLAGS = -Wall -Wextra -g -MMD -MP
-TARGET = awale
-SRCS   = awale.c interface.c
+TARGET = interface
+SRCS   = Serveur/awale.c Client/interface.c
 OBJS   = $(SRCS:.c=.o)
 DEPS   = $(OBJS:.o=.d)
 

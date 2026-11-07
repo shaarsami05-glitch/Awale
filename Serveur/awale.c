@@ -258,11 +258,11 @@ void lancerJeu()
     Plateau plateau;
     for (int k = 0; k < 6; k++)
     {
-        plateau.nord[k] = 1;
-        plateau.sud[k] = 2;
+        plateau.nord[k] = 4;
+        plateau.sud[k] = 4;
     }
-    plateau.scoreNord = 15;
-    plateau.scoreSud = 15;
+    plateau.scoreNord = 0;
+    plateau.scoreSud = 0;
 
     afficherJeu(plateau);
 
@@ -340,8 +340,10 @@ void lancerJeu()
     }
 }
 
-int main()
-{
-    lancerJeu();
-    return 0;
-}
+// int main()
+// {
+//     lancerJeu();
+//     return 0;
+// }
+
+// cd /mnt/c/Users/shaar/OneDrive/Documents/INSA/4A/Awale/Client
