@@ -170,7 +170,7 @@ void traiter_menu(Client *client, char *buffer)
    if (strcmp(buffer, "1") == 0)
    {
       printf("je suis rentré dans le if\n");
-      client->etat = CHOIX_ADVERSAIRE;
+      client->etat = LISTE_CLIENTS;
       strcpy(buffer, "Choisissez un adversaire.");
       write_client(client->sock, buffer);
       

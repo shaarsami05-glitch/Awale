@@ -1,9 +1,43 @@
 #ifndef INTERFACE_H
 #define INTERFACE_H
 
-#include "../Serveur/awale.h"
+#ifdef WIN32
 
-void afficherAuthentification();
-void afficherMenu(int menu, SOCKET sock);
+#include <winsock2.h>
+#include "interface.h"
+
+#elif defined (linux)
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h> /* close */
+#include <netdb.h> /* gethostbyname */
+#define INVALID_SOCKET -1
+#define SOCKET_ERROR -1
+#define closesocket(s) close(s)
+typedef int SOCKET;
+typedef struct sockaddr_in SOCKADDR_IN;
+typedef struct sockaddr SOCKADDR;
+typedef struct in_addr IN_ADDR;
+
+#else
+
+#error not defined for this platform
 
 #endif
+
+#define CRLF     "\r\n"
+#define PORT     1977
+
+#define BUF_SIZE 1024
+
+void afficherMenuConnecte();
+void afficherUtilisateurs(char* donnees);
+void afficherProfil(char* donnees);
+void afficherAttenteDefi(char *donnees);
+void afficherPropositionDefi(char* donnees);
+
+
+#endif /* guard */
