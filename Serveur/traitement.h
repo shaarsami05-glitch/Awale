@@ -42,6 +42,8 @@ void traiter_liste_clients(Client *client, char *buffer, Client clients[]);
 void traitement_en_cours(void);
 void traiter_profil(Client *client, char *buffer, Client clients[], int indice);
 void traiter_proposition_defi(Client *client, char *buffer, Client clients[]);
+void traiter_chat(Client *client, char *buffer, Client clients[], int actual);
+void send_message_to_all_clients(Client *clients, Client client, int actual, const char *buffer, char from_server);
 
 
 #endif /* guard */

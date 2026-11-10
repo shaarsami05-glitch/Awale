@@ -18,12 +18,10 @@ void traiter_message(Client clients[], int actual, int indice, char *buffer)
       break;
 
    case LISTE_CLIENTS:
-      // traitement_en_cours();
       traiter_liste_clients(client, buffer, clients);
       break;
 
    case PROFIL:
-      // traitement_en_cours();
       traiter_profil(client, buffer, clients, indice);
       break;
 
@@ -44,8 +42,7 @@ void traiter_message(Client clients[], int actual, int indice, char *buffer)
       break;
 
    case CHAT:
-      traitement_en_cours();
-      // traiter_chat(client, buffer);
+      traiter_chat(client, buffer, clients, actual);
       break;
    case PROPOSITION_DEFI:
       traiter_proposition_defi(client, buffer, clients);
@@ -82,6 +79,12 @@ void traiter_menu(Client *client, char *buffer, Client clients[], int actual)
       client->etat = SPECTATEUR;
       strcpy(buffer, "Vous êtes maintenant spectateur.");
    }
+   else if (strcmp(buffer, "3") == 0)
+   {
+      printf("DEBUG : entrée dans le chat\n");
+      client->etat = CHAT;
+      strcpy(buffer, "Bienvenue dans le chat. Entrez \"exit\" pour quitter.");
+   }
    else
    {
       strcpy(buffer, "Choix invalide.");
@@ -97,8 +100,11 @@ void traiter_liste_clients(Client *client, char *buffer, Client clients[])
 {
    if (strcmp(buffer, "0") == 0)
    {
-      strcpy(buffer, "");
+      // strcpy(buffer, "");
       client->etat = MENU;
+      char str[100];
+      snprintf(str, sizeof(str), "%d|%s \n", MENU, "Vous êtes de retour au menu principal.");
+      strcpy(buffer, str);
    }
    else
    {
@@ -138,6 +144,7 @@ void traiter_profil(Client *client, char *buffer, Client clients[], int indice)
       char message[100];
       snprintf(message, sizeof(message), "%d|%s \n", PROPOSITION_DEFI, client->name);
       send(clients[client->adversaire].sock, message, strlen(message), 0);
+
       // write_client(clients[client->adversaire].sock, buffer);
    }
 }
@@ -164,4 +171,55 @@ void traiter_proposition_defi(Client *client, char *buffer, Client clients[])
 void traitement_en_cours(void)
 {
    printf("La fonction n'a pas encore été implémentée.\n");
+}
+
+void traiter_chat(Client *client, char *buffer, Client clients[], int actual)
+{
+   // si le message est exit on quiite le chat, sinon on envoie le message à tous les clients connectés
+   if (strcmp(buffer, "exit") == 0)
+   {
+
+      send_message_to_all_clients(clients, *client, actual, "a quitté le chat !", 1);
+      client->etat = MENU;
+      char str[100];
+      snprintf(str, sizeof(str), "%d|%s \n", MENU, "Vous avez quitté le chat.");
+      strcpy(buffer, str);
+   }
+   else
+   {
+      send_message_to_all_clients(clients, *client, actual, buffer, 0);
+
+      buffer[0] = '\0';
+   }
+}
+
+void send_message_to_all_clients(Client *clients, Client sender, int actual, const char *buffer, char from_server)
+{
+   int i = 0;
+   char message[BUF_SIZE];
+   message[0] = 0;
+
+   for (i = 0 ; i < actual; i++)
+   {
+      /* we don't send message to the sender ou s'il est dans le chat*/
+      if (sender.sock != clients[i].sock &&
+          clients[i].etat == CHAT)
+      {
+         message[0] = '\0';
+
+         if (from_server == 0)
+         {
+            snprintf(message, sizeof(message),
+                     "%s : %s", sender.name, buffer);
+         }
+         else
+         {
+            snprintf(message, sizeof(message),
+                     "%s %s", sender.name, buffer);
+         }
+
+         send(clients[i].sock, message,
+              strlen(message), 0);
+      }
+   }
 }

@@ -74,6 +74,7 @@ void afficherUtilisateurs(char *donnees)
 void afficherProfil(char *donnees)
 {
     printf("=========== PROFIL DE %s ===========\n", donnees);
+    printf("Bio : Aucune bio pour le moment\n");
     printf("1. Défier\n");
     printf("2. Ajouter en ami\n");
     printf("3. Chat\n");

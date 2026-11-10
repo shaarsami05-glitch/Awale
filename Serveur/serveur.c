@@ -97,6 +97,7 @@ static void app(void)
          c.sock = csock;
          strncpy(c.name, buffer, sizeof(c.name) - 1);
          c.etat = MENU;
+         strcpy(c.bio, "Aucune bio pour le moment");
 
          clients[actual] = c;
          actual++;
@@ -154,27 +155,6 @@ static void remove_client(Client *clients, int to_remove, int *actual)
    memmove(clients + to_remove, clients + to_remove + 1, (*actual - to_remove - 1) * sizeof(Client));
    /* number client - 1 */
    (*actual)--;
-}
-
-static void send_message_to_all_clients(Client *clients, Client sender, int actual, const char *buffer, char from_server)
-{
-   int i = 0;
-   char message[BUF_SIZE];
-   message[0] = 0;
-   for (i = 0; i < actual; i++)
-   {
-      /* we don't send message to the sender */
-      if (sender.sock != clients[i].sock)
-      {
-         if (from_server == 0)
-         {
-            strncpy(message, sender.name, BUF_SIZE - 1);
-            strncat(message, " : ", sizeof message - strlen(message) - 1);
-         }
-         strncat(message, buffer, sizeof message - strlen(message) - 1);
-         write_client(clients[i].sock, message);
-      }
-   }
 }
 
 static int init_connection(void)
