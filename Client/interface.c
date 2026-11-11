@@ -93,7 +93,9 @@ void afficherMenuConnecte()
 
 void afficherAttenteDefi(char *donnees)
 {
+    printf("==============================\n");
     printf("En attente de %s...\n", donnees);
+    printf("==============================\n");
 }
 
 void afficherPropositionDefi(char *donnees)
@@ -102,4 +104,38 @@ void afficherPropositionDefi(char *donnees)
     printf("De %s\n", donnees);
     printf("1. Accepter\n");
     printf("2. Décliner\n");
+    printf("==============================\n");
+}
+
+void afficherJeu(Plateau plateau)
+{
+
+    printf("------------ PLATEAU ------------\n");
+
+    printf("f e d c b a \n");
+    for (int i = 0; i < 6; i++)
+    {
+        printf("%d ", plateau.nord[5 - i]);
+    }
+    printf("\n");
+    for (int j = 0; j < 6; j++)
+    {
+        printf("%d ", plateau.sud[j]);
+    }
+    printf("\nA B C D E F\n");
+    printf("-------------------------------\n");
+    printf("------------ SCORE ------------\n");
+    printf("Joueur 0 (NORD) : %d\n", plateau.scoreNord);
+    printf("Joueur 1 (SUD) : %d\n", plateau.scoreSud);
+    printf("-------------------------------\n");
+}
+
+int deserializerPlateau(const char *donnees, Plateau *p)
+{
+    return sscanf(donnees, "%d,%d,%d,%d,%d,%d|%d,%d,%d,%d,%d,%d|%d|%d",
+                  &p->nord[0], &p->nord[1], &p->nord[2],
+                  &p->nord[3], &p->nord[4], &p->nord[5],
+                  &p->sud[0], &p->sud[1], &p->sud[2],
+                  &p->sud[3], &p->sud[4], &p->sud[5],
+                  &p->scoreNord, &p->scoreSud) == 14; // 14 valeurs lues = succès
 }

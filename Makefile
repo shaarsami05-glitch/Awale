@@ -2,7 +2,7 @@ CC     = gcc
 CFLAGS = -Wall -Wextra -g -MMD -MP -IClient -IServeur
 
 CLIENT_SRCS  = Client/client.c Client/interface.c
-SERVEUR_SRCS = Serveur/serveur.c Serveur/awale.c Serveur/traitement.c
+SERVEUR_SRCS = Serveur/serveur.c Serveur/awale.c Serveur/traitement.c Serveur/basedonnees.c
 
 CLIENT_OBJS  = $(CLIENT_SRCS:.c=.o)
 SERVEUR_OBJS = $(SERVEUR_SRCS:.c=.o)

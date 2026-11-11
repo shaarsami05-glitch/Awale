@@ -33,11 +33,23 @@ typedef struct in_addr IN_ADDR;
 
 #define BUF_SIZE 1024
 
+typedef struct
+{
+    int nord[6];
+    int sud[6];
+    int scoreNord;
+    int scoreSud;
+} Plateau;
+
 void afficherMenuConnecte();
 void afficherUtilisateurs(char* donnees);
 void afficherProfil(char* donnees);
 void afficherAttenteDefi(char *donnees);
 void afficherPropositionDefi(char* donnees);
+int deserializerPlateau(const char *donnees, Plateau *p);
+void afficherJeu(Plateau plateau);
+
+
 
 
 #endif /* guard */

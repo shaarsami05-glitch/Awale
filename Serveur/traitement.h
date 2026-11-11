@@ -1,5 +1,5 @@
-#ifndef SERVER_H
-#define SERVER_H
+#ifndef TRAITEMENT_H
+#define TRAITEMENT_H
 
 #ifdef WIN32
 
@@ -42,6 +42,6 @@ void traiter_liste_clients(Client *client, char *buffer, Client clients[]);
 void traitement_en_cours(void);
 void traiter_profil(Client *client, char *buffer, Client clients[], int indice);
 void traiter_proposition_defi(Client *client, char *buffer, Client clients[]);
-
+void traiter_en_partie(Client *client, char *buffer, Client clients[]);
 
 #endif /* guard */

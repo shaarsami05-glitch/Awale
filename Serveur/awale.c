@@ -1,5 +1,8 @@
 #include <stdio.h>
+#include <string.h>
 #include "awale.h"
+#include "basedonnees.h"
+#include "client.h"
 
 // int nord[6] = [4,4,4,4,4,4];
 // int sud[6] = [4,4,4,4,4,4];
@@ -87,6 +90,10 @@ void afficherJeu(Plateau plateau)
     }
     printf("\nA B C D E F\n");
     printf("-------------------------------\n");
+    printf("------------ SCORE ------------\n");
+    printf("Joueur 0 (NORD) : %d\n", plateau.scoreNord);
+    printf("Joueur 1 (SUD) : %d\n", plateau.scoreSud);
+    printf("-------------------------------\n");
 }
 
 void afficherScore(Plateau plateau)
@@ -100,7 +107,7 @@ void afficherScore(Plateau plateau)
 Plateau deplacerGraines(int *coordonnees, Plateau plateau)
 // Ne jamais metttre de graines dans la case jouée
 {
-    // printf("Appel deplacerGraines \n");
+    printf("Appel deplacerGraines\n");
 
     // int *coordonnees = convertis(&coupJoue);
 
@@ -286,7 +293,7 @@ void lancerJeu()
             // Une seule lettre
             if (ligne[1] != '\n')
             {
-                printf("Ecrire une seule lettre svp \n");
+                printf("Ecrire une seule lettre svp\n");
             }
             else
             {
@@ -340,10 +347,113 @@ void lancerJeu()
     }
 }
 
+int idPartie = 0;
+
+Partie initialiserPartie(int joueurA, int joueurB)
+{
+    Partie partie = creerPartie();
+
+    partie.id = idPartie++;
+
+    Plateau plateau;
+    for (int k = 0; k < 6; k++)
+    {
+        plateau.nord[k] = 4;
+        plateau.sud[k] = 4;
+    }
+    plateau.scoreNord = 0;
+    plateau.scoreSud = 0;
+
+    partie.plateau = plateau;
+
+    // A rendre aléatoire
+    partie.joueurNord = joueurA;
+    partie.joueurSud = joueurB;
+
+    partie.statut = EN_COURS;
+
+    return partie;
+}
+
+void jouerCoup(Partie *partie, char *buffer, int joueur)
+{
+    printf("jouerCoup buffer : %s\n", buffer);
+    // Analyse le buffer
+    Plateau plateau = partie->plateau;
+    int *coordonnees;
+
+    // while (!estValide)
+    // {
+
+    // Vérifier coups légaux :
+
+    // Une seule lettre
+    if (buffer[1] != '\n')
+    {
+        strcpy(buffer, "Ecrire une seule lettre svp \n");
+        return;
+    }
+    else
+    {
+        // lettreJouee est [A , F] union [a, f]
+        coordonnees = convertis(&buffer[0]);
+
+        // Chaque joueur joue sa propre lettre
+        if (coordonnees[0] == joueur) // Nord = 0 et Sud = 1 (SUD commence)
+        {
+            // Verifier case non vide
+            if ((coordonnees[0] && plateau.sud[coordonnees[1]] == 0) || (coordonnees[1] && plateau.nord[coordonnees[1]] == 0))
+            {
+                strcpy(buffer, "Case vide. Veuillez rejouer\n");
+                return;
+            }
+        }
+        else
+        {
+            strcpy(buffer, "Coup invalide veuillez rejouer\n");
+            return;
+        }
+    }
+    //}
+    printf("Coord : %d\n", coordonnees[1]);
+    Plateau sauvegardePlateau = plateau;
+
+    plateau = deplacerGraines(coordonnees, plateau);
+
+    // Prévenir la famine (= obligé de nourrir son adversaire => si toutes les cases adverses sont vides, obligé de le nourrir)
+    if (estAffame(plateau, joueur))
+    {
+        // Restaurer le plateau
+        plateau = sauvegardePlateau;
+        // REJOUER !!!
+    }
+
+    if (plateau.scoreNord > 24 || plateau.scoreSud > 24)
+    {
+        partie->statut = 1;
+        // printf("Partie terminee \n");
+    }
+    printf("FIN JouerCoup : %s\n", buffer);
+}
+
+void serializerPlateau(Plateau plateau, char *buffer)
+// créer le buffer à envoyer aux clients
+{
+    // char buffer[256];
+    snprintf(buffer, 256, "%d,%d,%d,%d,%d,%d|%d,%d,%d,%d,%d,%d|%d|%d\n",
+             plateau.nord[0], plateau.nord[1], plateau.nord[2],
+             plateau.nord[3], plateau.nord[4], plateau.nord[5],
+             plateau.sud[0], plateau.sud[1], plateau.sud[2],
+             plateau.sud[3], plateau.sud[4], plateau.sud[5],
+             plateau.scoreNord, plateau.scoreSud);
+
+    // return buffer;
+}
+
 // int main()
 // {
 //     lancerJeu();
 //     return 0;
 // }
 
-// cd /mnt/c/Users/shaar/OneDrive/Documents/INSA/4A/Awale/Client
+// cd /mnt/c/Users/shaar/OneDrive/Documents/INSA/4A/Awale/bin

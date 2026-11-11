@@ -1,8 +1,6 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#include "serveur.h"
-
 typedef enum
 {
     MENU = 1, // Menu initial
@@ -17,6 +15,7 @@ typedef enum
 
 typedef struct
 {
+    
     SOCKET sock;
     char name[32];
     char bio[32];

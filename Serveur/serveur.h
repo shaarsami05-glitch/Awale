@@ -48,9 +48,4 @@ static void send_message_to_all_clients(Client *clients, Client client, int actu
 static void remove_client(Client *clients, int to_remove, int *actual);
 static void clear_clients(Client *clients, int actual);
 
-// void traiter_message(Client clients[], int actual, int indice, char *buffer);
-// void traiter_menu(Client *client, char *buffer, Client clients[], int actual);
-// void traiter_liste_clients(Client *client, char *buffer, Client clients[]);
-// void traitement_en_cours(void);
-
 #endif /* guard */

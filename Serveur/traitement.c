@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "traitement.h"
+#include "basedonnees.h"
 // #include "serveur.h"
 
 void traiter_message(Client clients[], int actual, int indice, char *buffer)
@@ -34,8 +35,8 @@ void traiter_message(Client clients[], int actual, int indice, char *buffer)
       break;
 
    case EN_PARTIE:
-      traitement_en_cours();
-      // traiter_partie(client, buffer);
+      printf("EN_PARTIE\n");
+      traiter_en_partie(client, buffer, clients);
       break;
 
    case SPECTATEUR:
@@ -72,7 +73,7 @@ void traiter_menu(Client *client, char *buffer, Client clients[], int actual)
       for (int i = 0; i < actual; i++)
       {
          char str[100];
-         snprintf(str, sizeof(str), "%d. %s | ", i + 1, clients[i].name);
+         snprintf(str, sizeof(str), "%d. %s \n", i + 1, clients[i].name);
          strcat(buffer, str);
       }
       printf("serv : %s\n", buffer);
@@ -149,16 +150,61 @@ void traiter_proposition_defi(Client *client, char *buffer, Client clients[])
    // ("2. Décliner\n");
    if (strcmp(buffer, "1") == 0)
    {
+      // Créer une partie
+      Partie partie = initialiserPartie(client->sock, clients[client->adversaire].sock);
+
       // Creer une partie pour les deux joueurs
       client->etat = EN_PARTIE;
       clients[client->adversaire].etat = EN_PARTIE;
 
-      char str[100];
-      snprintf(str, sizeof(str), "%d|%s \n", EN_PARTIE, "Début de la partie...");
-      strcpy(buffer, str);
+      client->partie = partie.id;
+      clients[client->adversaire].partie = partie.id;
 
+      // Sérialiser le plateau
+      serializerPlateau(partie.plateau, buffer);
+      char message[100];
+      snprintf(message, sizeof(message), "%d|%s \n", EN_PARTIE, buffer);
+      strcpy(buffer, message);
       send(clients[client->adversaire].sock, buffer, strlen(buffer), 0);
+
+      printf("Statut client  A : %d\n", client->etat);
+      printf("Statut client  B : %d\n", clients[client->adversaire].etat);
    }
+   else if (strcmp(buffer, "2") == 0)
+   {
+      // Proposition déclinée
+   }
+}
+
+void traiter_en_partie(Client *client, char *buffer, Client clients[])
+{
+   printf("traiter_en_partie : %s\n", buffer);
+   Partie partie = getPartieParId(client->partie);
+   printf("partie : %d\n", partie.id);
+   int joueur;
+   if (client->sock == partie.joueurNord)
+   {
+      joueur = 0; // Joueur Nord
+   }
+   else
+   {
+      joueur = 1; // Joueur Sud
+   }
+   printf("joueur  : %d\n", joueur);
+
+   // Recevoir un coup, analyser sa validité, jouer le coup, renvoyer le plateau
+   jouerCoup(&partie, buffer, joueur);
+   serializerPlateau(partie.plateau, buffer);
+
+   char message[100];
+   snprintf(message, sizeof(message), "%d|%s \n", EN_PARTIE, buffer);
+   strcpy(buffer, message);
+   printf("FIN traiter_en_partie : %s\n", buffer);
+
+
+   send(clients[client->adversaire].sock, buffer, strlen(buffer), 0);
+
+   // Envoyer le plateau aux Spectateurs de la partie
 }
 
 void traitement_en_cours(void)
