@@ -145,6 +145,7 @@ static int read_server(SOCKET sock, char *buffer)
       switch (type)
       {
       case 1:
+      printf("%s\n", donnees);
          afficherMenuConnecte();
          break;
       case 2:
