@@ -66,7 +66,7 @@ void afficherUtilisateurs(char *donnees)
     // 1. Bob
     // 2. Alice
     printf("======== UTILISATEURS ========\n");
-    printf("%s\n", donnees);
+    printf("%s", donnees);
     printf("0. Retour\n");
     printf("==============================\n");
 }

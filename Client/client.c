@@ -127,49 +127,71 @@ static void end_connection(int sock)
 }
 
 static int read_server(SOCKET sock, char *buffer)
-{ // affiche le menu correspondant
-   int n = 0;
+{
+    int n = 0;
 
-   if ((n = recv(sock, buffer, BUF_SIZE - 1, 0)) < 0)
-   {
-      perror("recv()");
-      exit(errno);
-   }
+    if ((n = recv(sock, buffer, BUF_SIZE - 1, 0)) <= 0)
+    {
+        if (n < 0)
+            perror("recv()");
+        return n;
+    }
 
-   buffer[n] = '\0';
+    buffer[n] = '\0';
 
-   int type;
-   char donnees[900];
-   if (sscanf(buffer, "%d|%899[^\n]", &type, donnees) >= 1)
-   {
-      switch (type)
-      {
-      case 1:
-         printf("%s\n", donnees);
-         afficherMenuConnecte();
-         break;
-      case 2:
-         afficherUtilisateurs(donnees);
-         break;
-      case 3:
-         afficherProfil(donnees);
-         break;
-      case 4:
-         printf("En attente de %s...\n", donnees);
-         break;
-      case 5:
-         afficherPropositionDefi(donnees);
-         break;
-      case 6: // EN_PARTIE TODOOOOOOOOO
-         traiteEnPartie(donnees);
-         break;
-      default:
-         printf("Erreur : %s\n", donnees);
-         break;
-      }
-   }
+    int type;
+    char donnees[BUF_SIZE];
 
-   return n;
+    // Rechercher le séparateur entre le type et les données
+    char *separateur = strchr(buffer, '|');
+
+    if (separateur != NULL)
+    {
+        // Récupérer le type
+        *separateur = '\0';
+        type = atoi(buffer);
+
+        // Récupérer toutes les données après le séparateur
+        snprintf(donnees, sizeof(donnees), "%s", separateur + 1);
+
+        switch (type)
+        {
+        case 1:
+            printf("%s\n", donnees);
+            afficherMenuConnecte();
+            break;
+
+        case 2:
+            afficherUtilisateurs(donnees);
+            break;
+
+        case 3:
+            afficherProfil(donnees);
+            break;
+
+        case 4:
+            printf("En attente de %s...\n", donnees);
+            break;
+
+        case 5:
+            afficherPropositionDefi(donnees);
+            break;
+
+        case 6:
+            traiteEnPartie(donnees);
+            break;
+
+        case 9:
+            // CHAT_PRIVE
+            break;
+
+        default:
+            printf("Erreur : %s\n", donnees);
+            break;
+        }
+    }
+
+    return n;
 }
 
 static void write_server(SOCKET sock, const char *buffer)
