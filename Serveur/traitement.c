@@ -45,8 +45,13 @@ void traiter_message(Client clients[], int actual, int indice, char *buffer)
    case CHAT:
       traiter_chat(client, buffer, clients, actual);
       break;
+
    case PROPOSITION_DEFI:
       traiter_proposition_defi(client, buffer, clients);
+      break;
+
+   case CHAT_PRIVE:
+      traiter_chat_prive(client, buffer, clients);
       break;
    }
 }
@@ -63,32 +68,42 @@ void traiter_menu(Client *client, char *buffer, Client clients[], int actual)
    printf("serv : choix du client %s : %s\n", client->name, buffer);
    if (strcmp(buffer, "1") == 0)
    {
-      // printf("je suis rentré dans le if\n");
+
       client->etat = LISTE_CLIENTS;
       strcpy(buffer, "2|");
-      // Envoyer la liste des clients connectés
+
+      int numero = 1;
+      // envoyer la liste des users connectés à l'interface
       for (int i = 0; i < actual; i++)
       {
+         // Ne pas afficher le client qui fait la requête
+         if (clients[i].sock == client->sock)
+            continue;
+
          char str[100];
-         snprintf(str, sizeof(str), "%d. %s \n", i + 1, clients[i].name);
+
+         snprintf(str, sizeof(str), "%d. %s\n",
+                  numero, clients[i].name);
+
          strcat(buffer, str);
+         numero++;
       }
       printf("serv : %s\n", buffer);
    }
    else if (strcmp(buffer, "2") == 0)
    {
       client->etat = SPECTATEUR;
-      strcpy(buffer, "Vous êtes maintenant spectateur.");
+      snprintf(buffer, BUF_SIZE, "%d|%s", SPECTATEUR, "Vous êtes maintenant spectateur.");
    }
    else if (strcmp(buffer, "3") == 0)
    {
       printf("DEBUG : entrée dans le chat\n");
       client->etat = CHAT;
-      strcpy(buffer, "Bienvenue dans le chat. Entrez \"exit\" pour quitter.");
+      snprintf(buffer, BUF_SIZE, "%d|%s", CHAT, "Bienvenue dans le chat. Entrez \"exit\" pour quitter.");
    }
    else
    {
-      strcpy(buffer, "Choix invalide.");
+      snprintf(buffer, BUF_SIZE, "%d|%s", MENU, "Choix invalide.");
    }
 }
 
@@ -148,6 +163,24 @@ void traiter_profil(Client *client, char *buffer, Client clients[], int indice)
 
       // write_client(clients[client->adversaire].sock, buffer);
    }
+   else if (strcmp(buffer, "2") == 0)
+   {
+      // Ajouter en ami
+      strcpy(buffer, "Fonctionnalité non implémentée.");
+   }
+   else if (strcmp(buffer, "3") == 0)
+   {
+      // Chat avec le client
+      client->etat = CHAT_PRIVE;
+      strcpy(buffer, "Entrez votre message ou 'exit' pour quitter.");
+   }
+   else if (strcmp(buffer, "0") == 0)
+   {
+      client->etat = LISTE_CLIENTS;
+      char str[100];
+      snprintf(str, sizeof(str), "%d|%s \n", client->etat, "Vous êtes de retour à la liste des clients.");
+      strcpy(buffer, str);
+   }
 }
 
 void traiter_proposition_defi(Client *client, char *buffer, Client clients[])
@@ -158,7 +191,7 @@ void traiter_proposition_defi(Client *client, char *buffer, Client clients[])
    if (strcmp(buffer, "1") == 0)
    {
       // Créer une partie
-      Partie* partie = initialiserPartie(client->sock, clients[client->adversaire].sock);
+      Partie *partie = initialiserPartie(client->sock, clients[client->adversaire].sock);
 
       // Creer une partie pour les deux joueurs
       client->etat = EN_PARTIE;
@@ -180,6 +213,15 @@ void traiter_proposition_defi(Client *client, char *buffer, Client clients[])
    else if (strcmp(buffer, "2") == 0)
    {
       // Proposition déclinée
+      // Retour au menu pour les deux joueurs
+      client->etat = MENU;
+      clients[client->adversaire].etat = MENU;
+
+      char str[100];
+      snprintf(str, sizeof(str), "%d|%s \n", client->etat, "Défi refusé.");
+      strcpy(buffer, str);
+
+      send(clients[client->adversaire].sock, buffer, strlen(buffer), 0);
    }
 }
 
@@ -207,7 +249,7 @@ void traiter_en_partie(Client *client, char *buffer, Client clients[])
    int erreur = 0;
    jouerCoup(partie, buffer, joueur, &erreur);
 
-   if(!partie->statut)
+   if (!partie->statut)
    {
       // Ajouter status fin de partie ? Rejouer...
       client->etat = MENU;
@@ -293,4 +335,43 @@ void send_message_to_all_clients(Client *clients, Client sender, int actual, con
               strlen(message), 0);
       }
    }
+}
+
+void traiter_chat_prive(Client *client, char *buffer, Client clients[])
+{
+   // Quitter le chat privé
+   if (strcmp(buffer, "exit") == 0)
+   {
+      client->etat = MENU;
+
+      strcpy(buffer, "Vous avez quitté le chat privé.");
+      return;
+   }
+
+   // Vérifier que le destinataire est valide
+   if (client->adversaire < 0)
+   {
+      strcpy(buffer, "Destinataire invalide.");
+      return;
+   }
+
+   Client *destinataire = &clients[client->adversaire];
+
+   // Construire le message
+   char message[BUF_SIZE];
+
+   snprintf(message, sizeof(message), "%d|%s : %s", client->etat, client->name, buffer);
+
+   // Envoyer une seule fois
+   if (send(destinataire->sock, message, strlen(message), 0) < 0)
+   {
+      perror("send");
+      strcpy(buffer, "Erreur lors de l'envoi.");
+      return;
+   }
+
+   // Retour au menu
+   client->etat = MENU;
+
+   snprintf(buffer, BUF_SIZE, "%d|Message envoyé.", client->etat);
 }

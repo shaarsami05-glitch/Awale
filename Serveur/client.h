@@ -11,6 +11,7 @@ typedef enum
     EN_PARTIE = 6, // Défi accepté
     SPECTATEUR = 7, // Spectateur d'une partie
     CHAT = 8,
+    CHAT_PRIVE = 9 // Chat privé avec un user
 } EtatClient;
 
 typedef struct
@@ -22,6 +23,7 @@ typedef struct
 
     EtatClient etat;
 
+    //indice dans la liste clients du serveur
     int adversaire; // idAdversaire --> EN_ATTENTE_DEFI et EN_PARTIE
 
     int partie; //idPartie --> EN_PARTIE et SPECTATEUR
