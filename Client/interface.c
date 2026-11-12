@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "interface.h"
 
 // char interligne[30] = " ============================== ";
@@ -62,11 +63,21 @@
 
 void afficherUtilisateurs(char *donnees)
 {
-    // affiche la liste des utilisateurs CONNECTES
-    // 1. Bob
-    // 2. Alice
     printf("======== UTILISATEURS ========\n");
-    printf("%s", donnees);
+
+    for (char *p = donnees; *p != '\0'; p++)
+    {
+        if (*p == '|')
+            putchar('\n');
+        else
+            putchar(*p);
+    }
+
+    // Terminer la dernière ligne si elle ne finit pas déjà par un séparateur
+    size_t len = strlen(donnees);
+    if (len > 0 && donnees[len - 1] != '|')
+        putchar('\n');
+
     printf("0. Retour\n");
     printf("==============================\n");
 }

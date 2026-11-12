@@ -2,6 +2,7 @@
 #define AWALE_H
 
 // #include "basedonnees.h"
+#include "client.h"
 
 typedef struct
 {
@@ -21,10 +22,11 @@ typedef struct
 {
     int id;
     Plateau plateau;
-    int joueurNord;
-    int joueurSud;
+    Client *joueurNord;
+    Client *joueurSud;
     int joueur; // A qui le tour
     Statut statut;
+    Client **spectateurs;
 } Partie;
 
 typedef enum
@@ -33,14 +35,14 @@ typedef enum
     MESSAGE = 1,
 } TypeMessage;
 
-void convertis(int* res, char lettre);
+void convertis(int *res, char lettre);
 void afficherJeu(Plateau plateau);
 void afficherScore(Plateau plateau);
 Plateau deplacerGraines(int *coordonnees, Plateau plateau);
 int estAffame(Plateau plateau, int joueur);
 void nourrirAdversaire(Plateau plateau, int joueur);
 void lancerJeu();
-void serializerPlateau(Plateau plateau, char* buffer);
-void jouerCoup(Partie *partie, char *buffer, int joueur, int* erreur);
+void serializerPlateau(Plateau plateau, char *buffer);
+void jouerCoup(Partie *partie, char *buffer, int joueur, int *erreur);
 
 #endif

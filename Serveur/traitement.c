@@ -155,6 +155,13 @@ void traiter_profil(Client *client, char *buffer, Client clients[], int indice, 
    printf("PROFIL buffer : %s\n", buffer);
    if (strcmp(buffer, "1") == 0)
    {
+      if (clients[client->adversaire].etat == EN_PARTIE)
+      {
+         // Ne peut pas proposer une partie à qqn qui est déjà en train de jouer
+         // snprintf(buffer, BUF_SIZE, "%d|Utilisateur déjà en partie.", PROFIL);
+         strcpy(buffer, "Utilisateur déjà en partie");
+         return;
+      }
       // Envoyer une invitation de partie au client
       client->etat = EN_ATTENTE_DEFI;
       if (client->adversaire < 0 || client->adversaire >= actual)
@@ -211,7 +218,7 @@ void traiter_proposition_defi(Client *client, char *buffer, Client clients[])
    if (strcmp(buffer, "1") == 0)
    {
       // Créer une partie
-      Partie *partie = initialiserPartie(client->sock, clients[client->adversaire].sock);
+      Partie *partie = initialiserPartie(client, &clients[client->adversaire]);
 
       // Creer une partie pour les deux joueurs
       client->etat = EN_PARTIE;
@@ -247,7 +254,7 @@ void traiter_proposition_defi(Client *client, char *buffer, Client clients[])
       //    send(partie->joueurSud, msg, strlen(msg), 0);
       // }
 
-      envoyerPlateau(partie->joueurSud, buffer, partie->joueur == 1, 0); // 1 si c'est à Sud
+      envoyerPlateau(partie->joueurSud->sock, buffer, partie->joueur == 1, 0); // 1 si c'est à Sud
 
       char msg[512];
       snprintf(msg, sizeof(msg), "%d|%d|%d|%s\n", EN_PARTIE, 0, partie->joueur == 0, buffer);
@@ -284,7 +291,7 @@ void traiter_en_partie(Client *client, char *buffer, Client clients[])
    printf("partie : %d\n", partie->id);
 
    int joueur;
-   if (client->sock == partie->joueurNord)
+   if (client->sock == partie->joueurNord->sock)
    {
       joueur = 0; // Joueur Nord
    }
@@ -350,10 +357,15 @@ void traiter_en_partie(Client *client, char *buffer, Client clients[])
    serializerPlateau(partie->plateau, buffer); // contient seulement "4,4,4,4,4,4|4,4,4,4,4,4|0|0"
 
    if (joueur)
-      envoyerPlateau(partie->joueurNord, buffer, partie->joueur == 0, 0); // 1 si c'est à Nord
+      envoyerPlateau(partie->joueurNord->sock, buffer, partie->joueur == 0, 0); // 1 si c'est à Nord
    else
-      envoyerPlateau(partie->joueurSud, buffer, partie->joueur == 1, 0); // 1 si c'est à Sud
+      envoyerPlateau(partie->joueurSud->sock, buffer, partie->joueur == 1, 0); // 1 si c'est à Sud
 
+   char message[100];
+   snprintf(message, sizeof(message), "%d|%d|%d|%s \n", EN_PARTIE, 0, 0, buffer);
+   strcpy(buffer, message);
+   //snprintf(buffer, BUF_SIZE, "%d|%d|%d|%s", EN_PARTIE, 0, 0, buffer);
+   
    // Envoyer le plateau aux Spectateurs de la partie
    // TODO
 }
@@ -467,8 +479,10 @@ void construire_liste_clients(Client *client, Client clients[], int actual, char
 
       char ligne[100];
 
-      snprintf(ligne, sizeof(ligne), "%d. %s\n", numero++, clients[i].name);
+      snprintf(ligne, sizeof(ligne), "%d. %s |", numero++, clients[i].name);
 
       strncat(buffer, ligne, BUF_SIZE - strlen(buffer) - 1);
+
+      //printf("buffer : %s", buffer);
    }
 }

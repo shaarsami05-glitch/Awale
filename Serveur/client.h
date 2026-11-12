@@ -1,6 +1,8 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
+typedef int SOCKET;
+
 typedef enum
 {
     MENU = 1, // Menu initial

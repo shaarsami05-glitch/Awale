@@ -38,7 +38,7 @@ typedef struct in_addr IN_ADDR;
 #include "traitement.h"
 #include "awale.h"
 
-Partie *initialiserPartie(int joueurA, int joueurB);
+Partie *initialiserPartie(Client *joueurA, Client *joueurB);
 Partie *getPartieParId(int id);
 
 #endif /* guard */

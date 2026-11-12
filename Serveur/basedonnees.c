@@ -9,7 +9,7 @@
 Partie parties[MAX_PARTIES];
 int nbParties = 0;
 
-Partie *initialiserPartie(int joueurA, int joueurB)
+Partie *initialiserPartie(Client *joueurA, Client *joueurB)
 {
     if (nbParties >= MAX_PARTIES)
         return NULL;
@@ -44,3 +44,17 @@ Partie *getPartieParId(int id)
     }
     return NULL;
 }
+
+// void getPartiesPourSpec()
+// {
+//     Partie **partiesEnCours;
+//     int nbPartiesEnCours = 0;
+//     for (int i = 0; i < nbParties; i++)
+//     {
+//         if (parties[i].statut)
+//         {
+//             partiesEnCours[nbPartiesEnCours++] = &parties[i];
+//         }
+//     }
+// }
+
