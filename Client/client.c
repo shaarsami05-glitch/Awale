@@ -181,8 +181,12 @@ static int read_server(SOCKET sock, char *buffer)
             traiteEnPartie(donnees);
             break;
 
+         case 7:
+            printf("%s\n", donnees);
+            break;
+
         case 9:
-            // CHAT_PRIVE
+            printf("%s\n", donnees);
             break;
 
         default:

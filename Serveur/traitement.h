@@ -38,14 +38,15 @@ typedef struct in_addr IN_ADDR;
 
 void traiter_message(Client clients[], int actual, int indice, char *buffer);
 void traiter_menu(Client *client, char *buffer, Client clients[], int actual);
-void traiter_liste_clients(Client *client, char *buffer, Client clients[]);
+void traiter_liste_clients(Client *client, char *buffer, Client clients[], int actual);
 void traitement_en_cours(void);
-void traiter_profil(Client *client, char *buffer, Client clients[], int indice);
+void traiter_profil(Client *client, char *buffer, Client clients[], int indice, int actual);
 void traiter_proposition_defi(Client *client, char *buffer, Client clients[]);
 void traiter_en_partie(Client *client, char *buffer, Client clients[]);
 void traiter_chat(Client *client, char *buffer, Client clients[], int actual);
 void send_message_to_all_clients(Client *clients, Client client, int actual, const char *buffer, char from_server);
-void traiter_chat_prive(Client *client, char *buffer, Client clients[]);
-
+void traiter_chat_prive(Client *client, char *buffer, Client clients[], int actual);
+void construire_menu(char *buffer);
+void construire_liste_clients(Client *client, Client clients[], int actual, char *buffer);
 
 #endif /* guard */

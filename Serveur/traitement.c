@@ -19,11 +19,11 @@ void traiter_message(Client clients[], int actual, int indice, char *buffer)
       break;
 
    case LISTE_CLIENTS:
-      traiter_liste_clients(client, buffer, clients);
+      traiter_liste_clients(client, buffer, clients, actual);
       break;
 
    case PROFIL:
-      traiter_profil(client, buffer, clients, indice);
+      traiter_profil(client, buffer, clients, indice, actual);
       break;
 
    case EN_ATTENTE_DEFI:
@@ -51,7 +51,7 @@ void traiter_message(Client clients[], int actual, int indice, char *buffer)
       break;
 
    case CHAT_PRIVE:
-      traiter_chat_prive(client, buffer, clients);
+      traiter_chat_prive(client, buffer, clients, actual);
       break;
    }
 }
@@ -70,24 +70,7 @@ void traiter_menu(Client *client, char *buffer, Client clients[], int actual)
    {
 
       client->etat = LISTE_CLIENTS;
-      strcpy(buffer, "2|");
-
-      int numero = 1;
-      // envoyer la liste des users connectés à l'interface
-      for (int i = 0; i < actual; i++)
-      {
-         // Ne pas afficher le client qui fait la requête
-         if (clients[i].sock == client->sock)
-            continue;
-
-         char str[100];
-
-         snprintf(str, sizeof(str), "%d. %s\n",
-                  numero, clients[i].name);
-
-         strcat(buffer, str);
-         numero++;
-      }
+      construire_liste_clients(client, clients, actual, buffer);
       printf("serv : %s\n", buffer);
    }
    else if (strcmp(buffer, "2") == 0)
@@ -103,39 +86,65 @@ void traiter_menu(Client *client, char *buffer, Client clients[], int actual)
    }
    else
    {
-      snprintf(buffer, BUF_SIZE, "%d|%s", MENU, "Choix invalide.");
+      strcpy(buffer, "Choix invalide.\n");
    }
 }
 
-void traiter_liste_clients(Client *client, char *buffer, Client clients[])
+void traiter_liste_clients(Client *client, char *buffer, Client clients[], int actual)
 //"======== UTILISATEURS ========\n");
 // 1. Alice
 // 2. Bob
 // 0. Retour
 // "==============================\n");
 {
+   // retour au menu principal
    if (strcmp(buffer, "0") == 0)
    {
-      // strcpy(buffer, "");
       client->etat = MENU;
-      char str[100];
-      snprintf(str, sizeof(str), "%d|%s \n", MENU, "Vous êtes de retour au menu principal.");
-      strcpy(buffer, str);
+      construire_menu(buffer);
+      return;
    }
-   else
-   {
-      client->etat = PROFIL;
-      // Afficher le profil du client choisi
 
-      client->adversaire = atoi(buffer) - 1; // stocker utilisateur selectionne
-      char str[100];
-      snprintf(str, sizeof(str), "%d|%s \n", PROFIL, clients[atoi(buffer) - 1].name);
-      strcpy(buffer, str);
-      printf("buffer : %s\n", buffer);
+   int numero = atoi(buffer);
+
+   // checker le choix du client
+   if (numero <= 0)
+   {
+      strcpy(buffer, "Choix invalide.\n");
+      return;
    }
+
+   int compteur = 0;
+   int indice = -1;
+
+   // retenir le bon indice de la personne choisie par le client
+   for (int i = 0; i < actual; i++)
+   {
+      if (clients[i].sock == client->sock)
+         continue;
+
+      compteur++;
+
+      if (compteur == numero)
+      {
+         indice = i;
+         break;
+      }
+   }
+
+   if (indice == -1)
+   {
+      strcpy(buffer, "Choix invalide.\n");
+      return;
+   }
+
+   client->adversaire = indice;
+   client->etat = PROFIL;
+
+   snprintf(buffer, BUF_SIZE, "%d|%s", PROFIL, clients[indice].name);
 }
 
-void traiter_profil(Client *client, char *buffer, Client clients[], int indice)
+void traiter_profil(Client *client, char *buffer, Client clients[], int indice, int actual)
 {
    //  ("=========== PROFIL ===========\n");
    //  ("1. Défier\n");
@@ -148,6 +157,11 @@ void traiter_profil(Client *client, char *buffer, Client clients[], int indice)
    {
       // Envoyer une invitation de partie au client
       client->etat = EN_ATTENTE_DEFI;
+      if (client->adversaire < 0 || client->adversaire >= actual)
+      {
+         snprintf(buffer, BUF_SIZE, "%d|Adversaire invalide.", PROFIL);
+         return;
+      }
       clients[client->adversaire].etat = PROPOSITION_DEFI;
 
       // Je suis l'adversaire de mon adversaire
@@ -172,14 +186,13 @@ void traiter_profil(Client *client, char *buffer, Client clients[], int indice)
    {
       // Chat avec le client
       client->etat = CHAT_PRIVE;
-      strcpy(buffer, "Entrez votre message ou 'exit' pour quitter.");
+      snprintf(buffer, BUF_SIZE, "%d|%s", client->etat, "Entrez votre message ou 'exit' pour quitter.");
    }
    else if (strcmp(buffer, "0") == 0)
    {
       client->etat = LISTE_CLIENTS;
-      char str[100];
-      snprintf(str, sizeof(str), "%d|%s \n", client->etat, "Vous êtes de retour à la liste des clients.");
-      strcpy(buffer, str);
+
+      construire_liste_clients(client, clients, actual, buffer);
    }
 }
 
@@ -254,9 +267,15 @@ void traiter_en_partie(Client *client, char *buffer, Client clients[])
       // Ajouter status fin de partie ? Rejouer...
       client->etat = MENU;
       clients[client->adversaire].etat = MENU;
-      char message[100];
-      snprintf(message, sizeof(message), "%d|%s \n", MENU, buffer);
-      strcpy(buffer, message);
+
+      construire_menu(buffer);
+
+      char message[BUF_SIZE];
+      construire_menu(message);
+
+      send(clients[client->adversaire].sock,
+           message, strlen(message), 0);
+
       return;
    }
 
@@ -294,9 +313,7 @@ void traiter_chat(Client *client, char *buffer, Client clients[], int actual)
 
       send_message_to_all_clients(clients, *client, actual, "a quitté le chat !", 1);
       client->etat = MENU;
-      char str[100];
-      snprintf(str, sizeof(str), "%d|%s \n", MENU, "Vous avez quitté le chat.");
-      strcpy(buffer, str);
+      construire_menu(buffer);
    }
    else
    {
@@ -337,19 +354,19 @@ void send_message_to_all_clients(Client *clients, Client sender, int actual, con
    }
 }
 
-void traiter_chat_prive(Client *client, char *buffer, Client clients[])
+void traiter_chat_prive(Client *client, char *buffer, Client clients[], int actual)
 {
    // Quitter le chat privé
    if (strcmp(buffer, "exit") == 0)
    {
-      client->etat = MENU;
+      client->etat = LISTE_CLIENTS;
 
-      strcpy(buffer, "Vous avez quitté le chat privé.");
+      construire_liste_clients(client, clients, actual, buffer);
       return;
    }
 
    // Vérifier que le destinataire est valide
-   if (client->adversaire < 0)
+   if (client->adversaire < 0 || client->adversaire >= actual)
    {
       strcpy(buffer, "Destinataire invalide.");
       return;
@@ -370,8 +387,30 @@ void traiter_chat_prive(Client *client, char *buffer, Client clients[])
       return;
    }
 
-   // Retour au menu
-   client->etat = MENU;
+   // tant qu'on a pas ecrit exit, on reste dans le chat privé
+   snprintf(buffer, BUF_SIZE, "%d|%s", CHAT_PRIVE, "Message envoyé.");
+}
 
-   snprintf(buffer, BUF_SIZE, "%d|Message envoyé.", client->etat);
+void construire_menu(char *buffer)
+{
+   snprintf(buffer, BUF_SIZE, "%d|Bienvenue dans le menu.", MENU);
+}
+
+void construire_liste_clients(Client *client, Client clients[], int actual, char *buffer)
+{
+   snprintf(buffer, BUF_SIZE, "%d|", LISTE_CLIENTS);
+
+   int numero = 1;
+
+   for (int i = 0; i < actual; i++)
+   {
+      if (clients[i].sock == client->sock)
+         continue;
+
+      char ligne[100];
+
+      snprintf(ligne, sizeof(ligne), "%d. %s\n", numero++, clients[i].name);
+
+      strncat(buffer, ligne, BUF_SIZE - strlen(buffer) - 1);
+   }
 }
