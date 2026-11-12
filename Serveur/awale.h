@@ -26,7 +26,6 @@ typedef struct
     Client *joueurSud;
     int joueur; // A qui le tour
     Statut statut;
-    Client **spectateurs;
 } Partie;
 
 typedef enum

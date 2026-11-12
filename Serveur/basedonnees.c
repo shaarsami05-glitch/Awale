@@ -45,16 +45,18 @@ Partie *getPartieParId(int id)
     return NULL;
 }
 
-// void getPartiesPourSpec()
-// {
-//     Partie **partiesEnCours;
-//     int nbPartiesEnCours = 0;
-//     for (int i = 0; i < nbParties; i++)
-//     {
-//         if (parties[i].statut)
-//         {
-//             partiesEnCours[nbPartiesEnCours++] = &parties[i];
-//         }
-//     }
-// }
+
+int getPartiesEnCours(Partie** partiesEnCours)
+{
+    //Partie **partiesEnCours;
+    int nbPartiesEnCours = 0;
+    for (int i = 0; i < nbParties; i++)
+    {
+        if (parties[i].statut == EN_COURS)
+        {
+            partiesEnCours[nbPartiesEnCours++] = &parties[i];
+        }
+    }
+    return nbPartiesEnCours;
+}
 
