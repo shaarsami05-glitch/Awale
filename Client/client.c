@@ -145,7 +145,7 @@ static int read_server(SOCKET sock, char *buffer)
       switch (type)
       {
       case 1:
-      printf("%s\n", donnees);
+         printf("%s\n", donnees);
          afficherMenuConnecte();
          break;
       case 2:
@@ -155,15 +155,13 @@ static int read_server(SOCKET sock, char *buffer)
          afficherProfil(donnees);
          break;
       case 4:
-         printf("En attente de %s...\n", donnees);;
+         printf("En attente de %s...\n", donnees);
          break;
       case 5:
          afficherPropositionDefi(donnees);
          break;
-      case 6: //EN_PARTIE TODOOOOOOOOO
-         Plateau p;
-         deserializerPlateau(donnees, &p);
-         afficherJeu(p);
+      case 6: // EN_PARTIE TODOOOOOOOOO
+         traiteEnPartie(donnees);
          break;
       default:
          printf("Erreur : %s\n", donnees);

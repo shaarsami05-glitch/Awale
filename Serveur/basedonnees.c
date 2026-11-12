@@ -5,22 +5,40 @@
 
 #include "basedonnees.h"
 
-Partie parties[100];
-int nbPartie = 0;
+Partie parties[MAX_PARTIES];
+int nbParties = 0;
 
-Partie creerPartie()
+Partie *initialiserPartie(int joueurA, int joueurB)
 {
-    Partie partie;
-    partie.id = nbPartie;
-    parties[nbPartie++] = partie;
+    if (nbParties >= MAX_PARTIES)
+        return NULL;
+
+    Partie *partie = &parties[nbParties];
+
+    partie->id = nbParties++;
+    for (int k = 0; k < 6; k++)
+    {
+        partie->plateau.nord[k] = 4;
+        partie->plateau.sud[k] = 4;
+    }
+    partie->plateau.scoreNord = 0;
+    partie->plateau.scoreSud = 0;
+
+    partie->joueurNord = joueurA;
+    partie->joueurSud = joueurB;
+    partie->statut = EN_COURS;
+
     return partie;
 }
 
-Partie getPartieParId(int id)
+Partie *getPartieParId(int id)
 {
-    for (int i = 0; i < nbPartie; i++){
-        if(parties[i].id == id){
-            return parties[i];
+    for (int i = 0; i < nbParties; i++)
+    {
+        if (parties[i].id == id)
+        {
+            return &parties[i];
         }
     }
+    return NULL;
 }

@@ -140,3 +140,22 @@ int deserializerPlateau(const char *donnees, Plateau *p)
                   &p->sud[3], &p->sud[4], &p->sud[5],
                   &p->scoreNord, &p->scoreSud) == 14; // 14 valeurs lues = succès
 }
+
+void traiteEnPartie(char *donnees)
+{
+    int erreur;
+    char message[100];
+    if (sscanf(donnees, "%d|%899[^\n]", &erreur, message) >= 1)
+    {
+        if (erreur)
+        {
+            printf("%s\n", message);
+        }
+        else
+        {
+            Plateau p = {0};
+            deserializerPlateau(message, &p);
+            afficherJeu(p);
+        }
+    }
+}

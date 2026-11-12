@@ -4,8 +4,6 @@
 #include <string.h>
 
 #include "serveur.h"
-// #include "client.h"
-// #include "traitement.h"
 
 static void init(void)
 {

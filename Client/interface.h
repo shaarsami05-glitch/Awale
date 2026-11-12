@@ -48,6 +48,7 @@ void afficherAttenteDefi(char *donnees);
 void afficherPropositionDefi(char* donnees);
 int deserializerPlateau(const char *donnees, Plateau *p);
 void afficherJeu(Plateau plateau);
+void traiteEnPartie(char *donnees);
 
 
 

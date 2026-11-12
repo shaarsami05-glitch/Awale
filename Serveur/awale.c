@@ -10,67 +10,24 @@
 // int joueur = 0  => NORD;
 // int joueur = 1  => SUD;
 
-int *convertis(char *lettre)
+void convertis(int *res, char lettre)
 {
-
     // printf("Appel convertis\n");
-    int *res;
-    switch (*lettre)
+    if (lettre >= 'a' && lettre <= 'f')
     {
-    case 'a':
         res[0] = 0;
-        res[1] = 0;
-        break;
-    case 'b':
-        res[0] = 0;
-        res[1] = 1;
-        break;
-    case 'c':
-        res[0] = 0;
-        res[1] = 2;
-        break;
-    case 'd':
-        res[0] = 0;
-        res[1] = 3;
-        break;
-    case 'e':
-        res[0] = 0;
-        res[1] = 4;
-        break;
-    case 'f':
-        res[0] = 0;
-        res[1] = 5;
-        break;
-    case 'A':
-        res[0] = 1;
-        res[1] = 0;
-        break;
-    case 'B':
-        res[0] = 1;
-        res[1] = 1;
-        break;
-    case 'C':
-        res[0] = 1;
-        res[1] = 2;
-        break;
-    case 'D':
-        res[0] = 1;
-        res[1] = 3;
-        break;
-    case 'E':
-        res[0] = 1;
-        res[1] = 4;
-        break;
-    case 'F':
-        res[0] = 1;
-        res[1] = 5;
-        break;
-
-    default:
-        res[0] = 2;
+        res[1] = lettre - 'a';
     }
-
-    return res;
+    else if (lettre >= 'A' && lettre <= 'F')
+    {
+        res[0] = 1;
+        res[1] = lettre - 'A';
+    }
+    else
+    {
+        res[0] = 2;
+        res[1] = -1;
+    }
 }
 
 void afficherJeu(Plateau plateau)
@@ -281,7 +238,7 @@ void lancerJeu()
         nourrirAdversaire(plateau, i % 2);
 
         int estValide = 0;
-        int *coordonnees;
+        int coordonnees[2];
         while (!estValide)
         {
             // Vérifier coups légaux :
@@ -299,7 +256,7 @@ void lancerJeu()
             {
                 printf("else \n");
                 // lettreJouee est [A , F] union [a, f]
-                coordonnees = convertis(&ligne[0]);
+                convertis(coordonnees, ligne[0]);
 
                 // Chaque joueur joue sa propre lettre
                 if (coordonnees[0] == i % 2) // Nord = 0 et Sud = 1 (SUD commence)
@@ -347,91 +304,74 @@ void lancerJeu()
     }
 }
 
-int idPartie = 0;
-
-Partie initialiserPartie(int joueurA, int joueurB)
-{
-    Partie partie = creerPartie();
-
-    partie.id = idPartie++;
-
-    Plateau plateau;
-    for (int k = 0; k < 6; k++)
-    {
-        plateau.nord[k] = 4;
-        plateau.sud[k] = 4;
-    }
-    plateau.scoreNord = 0;
-    plateau.scoreSud = 0;
-
-    partie.plateau = plateau;
-
-    // A rendre aléatoire
-    partie.joueurNord = joueurA;
-    partie.joueurSud = joueurB;
-
-    partie.statut = EN_COURS;
-
-    return partie;
-}
-
-void jouerCoup(Partie *partie, char *buffer, int joueur)
+void jouerCoup(Partie *partie, char *buffer, int joueur, int *erreur)
 {
     printf("jouerCoup buffer : %s\n", buffer);
     // Analyse le buffer
     Plateau plateau = partie->plateau;
-    int *coordonnees;
+    // afficherJeu(plateau);
 
-    // while (!estValide)
-    // {
+    int coordonnees[2];
 
     // Vérifier coups légaux :
 
     // Une seule lettre
-    if (buffer[1] != '\n')
+    if (buffer[1] != '\0')
     {
+        printf("buffer 1 : %c\n", buffer[1]);
+        *erreur = 1;
         strcpy(buffer, "Ecrire une seule lettre svp \n");
         return;
     }
     else
     {
         // lettreJouee est [A , F] union [a, f]
-        coordonnees = convertis(&buffer[0]);
+        printf("buffer 0 : %c\n", buffer[0]);
+        convertis(coordonnees, buffer[0]);
+        printf("Coord 0 : %d\n", coordonnees[0]);
+        printf("Coord 1: %d\n", coordonnees[1]);
+        printf("plateau : %d\n", plateau.sud[coordonnees[1]]);
 
         // Chaque joueur joue sa propre lettre
         if (coordonnees[0] == joueur) // Nord = 0 et Sud = 1 (SUD commence)
         {
             // Verifier case non vide
-            if ((coordonnees[0] && plateau.sud[coordonnees[1]] == 0) || (coordonnees[1] && plateau.nord[coordonnees[1]] == 0))
+            if ((coordonnees[0] && plateau.sud[coordonnees[1]] == 0) || (!coordonnees[0] && plateau.nord[coordonnees[1]] == 0))
             {
+                *erreur = 1;
                 strcpy(buffer, "Case vide. Veuillez rejouer\n");
                 return;
             }
         }
         else
         {
+            *erreur = 1;
             strcpy(buffer, "Coup invalide veuillez rejouer\n");
             return;
         }
     }
     //}
-    printf("Coord : %d\n", coordonnees[1]);
     Plateau sauvegardePlateau = plateau;
 
     plateau = deplacerGraines(coordonnees, plateau);
+
+    partie->plateau = plateau;
+    
 
     // Prévenir la famine (= obligé de nourrir son adversaire => si toutes les cases adverses sont vides, obligé de le nourrir)
     if (estAffame(plateau, joueur))
     {
         // Restaurer le plateau
         plateau = sauvegardePlateau;
-        // REJOUER !!!
+        *erreur = 1;
+        strcpy(buffer, "Adversaire en FAMINE ! Coup invalide ! Veuillez rejouer\n");
+        return;
     }
 
     if (plateau.scoreNord > 24 || plateau.scoreSud > 24)
     {
-        partie->statut = 1;
-        // printf("Partie terminee \n");
+        partie->statut = 0;
+        strcpy(buffer, "Partie Terminee !\n");
     }
     printf("FIN JouerCoup : %s\n", buffer);
 }
