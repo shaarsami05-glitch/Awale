@@ -48,5 +48,7 @@ void send_message_to_all_clients(Client *clients, Client client, int actual, con
 void traiter_chat_prive(Client *client, char *buffer, Client clients[], int actual);
 void construire_menu(char *buffer);
 void construire_liste_clients(Client *client, Client clients[], int actual, char *buffer);
+static void envoyerPlateau(int sock, const char *plateauStr, int doitJouer, int erreur);
+
 
 #endif /* guard */

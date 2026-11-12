@@ -143,19 +143,24 @@ int deserializerPlateau(const char *donnees, Plateau *p)
 
 void traiteEnPartie(char *donnees)
 {
-    int erreur;
-    char message[100];
-    if (sscanf(donnees, "%d|%899[^\n]", &erreur, message) >= 1)
+    int erreur, doitJouer;
+    char reste[800] = "";
+
+    if (sscanf(donnees, "%d|%d|%799[^\n]", &erreur, &doitJouer, reste) == 3)
     {
-        if (erreur)
+        if (erreur == 0)
         {
-            printf("%s\n", message);
+            Plateau p = {0};
+            if (deserializerPlateau(reste, &p))
+                afficherJeu(p);
         }
         else
         {
-            Plateau p = {0};
-            deserializerPlateau(message, &p);
-            afficherJeu(p);
+            printf("%s\n", reste);
         }
+        if (doitJouer)
+            printf("C'est à vous de jouer !\n");
+        else
+            printf("En attente de l'adversaire...\n");
     }
 }
