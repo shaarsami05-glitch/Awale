@@ -45,6 +45,7 @@ void traiter_proposition_defi(Client *client, char *buffer, Client clients[]);
 void traiter_en_partie(Client *client, char *buffer, Client clients[]);
 void traiter_chat(Client *client, char *buffer, Client clients[], int actual);
 void send_message_to_all_clients(Client *clients, Client client, int actual, const char *buffer, char from_server);
+static void envoyerPlateau(int sock, const char *plateauStr, int doitJouer, int erreur);
 
 
 #endif /* guard */

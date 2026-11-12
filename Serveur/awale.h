@@ -23,6 +23,7 @@ typedef struct
     Plateau plateau;
     int joueurNord;
     int joueurSud;
+    int joueur; // A qui le tour
     Statut statut;
 } Partie;
 

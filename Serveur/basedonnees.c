@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "basedonnees.h"
 
@@ -26,6 +27,7 @@ Partie *initialiserPartie(int joueurA, int joueurB)
 
     partie->joueurNord = joueurA;
     partie->joueurSud = joueurB;
+    partie->joueur = rand() % 2; // Détermine aléatoirement le joueur qui commence
     partie->statut = EN_COURS;
 
     return partie;

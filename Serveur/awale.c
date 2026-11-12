@@ -309,6 +309,12 @@ void jouerCoup(Partie *partie, char *buffer, int joueur, int *erreur)
     printf("jouerCoup buffer : %s\n", buffer);
     // Analyse le buffer
     Plateau plateau = partie->plateau;
+    if (joueur != partie->joueur)
+    {
+        *erreur = 1;
+        strcpy(buffer, "Ce n'est pas votre tour !\n");
+        return;
+    }
     // afficherJeu(plateau);
 
     int coordonnees[2];
@@ -320,43 +326,37 @@ void jouerCoup(Partie *partie, char *buffer, int joueur, int *erreur)
     {
         printf("buffer 1 : %c\n", buffer[1]);
         *erreur = 1;
-        strcpy(buffer, "Ecrire une seule lettre svp \n");
+        strcpy(buffer, "Ecrire une seule lettre svp");
         return;
     }
     else
     {
         // lettreJouee est [A , F] union [a, f]
-        printf("buffer 0 : %c\n", buffer[0]);
         convertis(coordonnees, buffer[0]);
-        printf("Coord 0 : %d\n", coordonnees[0]);
-        printf("Coord 1: %d\n", coordonnees[1]);
-        printf("plateau : %d\n", plateau.sud[coordonnees[1]]);
 
         // Chaque joueur joue sa propre lettre
-        if (coordonnees[0] == joueur) // Nord = 0 et Sud = 1 (SUD commence)
+        if (coordonnees[0] == joueur) // Nord = 0 et Sud = 1
         {
             // Verifier case non vide
             if ((coordonnees[0] && plateau.sud[coordonnees[1]] == 0) || (!coordonnees[0] && plateau.nord[coordonnees[1]] == 0))
             {
                 *erreur = 1;
-                strcpy(buffer, "Case vide. Veuillez rejouer\n");
+                strcpy(buffer, "Case vide. Veuillez rejouer");
                 return;
             }
         }
         else
         {
             *erreur = 1;
-            strcpy(buffer, "Coup invalide veuillez rejouer\n");
+            strcpy(buffer, "Coup invalide veuillez rejouer");
             return;
         }
     }
-    //}
     Plateau sauvegardePlateau = plateau;
 
     plateau = deplacerGraines(coordonnees, plateau);
 
     partie->plateau = plateau;
-    
 
     // Prévenir la famine (= obligé de nourrir son adversaire => si toutes les cases adverses sont vides, obligé de le nourrir)
     if (estAffame(plateau, joueur))
@@ -364,30 +364,28 @@ void jouerCoup(Partie *partie, char *buffer, int joueur, int *erreur)
         // Restaurer le plateau
         plateau = sauvegardePlateau;
         *erreur = 1;
-        strcpy(buffer, "Adversaire en FAMINE ! Coup invalide ! Veuillez rejouer\n");
+        strcpy(buffer, "Adversaire en FAMINE ! Coup invalide ! Veuillez rejouer");
         return;
     }
 
     if (plateau.scoreNord > 24 || plateau.scoreSud > 24)
     {
         partie->statut = 0;
-        strcpy(buffer, "Partie Terminee !\n");
+        strcpy(buffer, "Partie Terminee !");
     }
+    partie->joueur = (partie->joueur + 1) % 2;
     printf("FIN JouerCoup : %s\n", buffer);
 }
 
 void serializerPlateau(Plateau plateau, char *buffer)
 // créer le buffer à envoyer aux clients
 {
-    // char buffer[256];
-    snprintf(buffer, 256, "%d,%d,%d,%d,%d,%d|%d,%d,%d,%d,%d,%d|%d|%d\n",
+    snprintf(buffer, 256, "%d,%d,%d,%d,%d,%d|%d,%d,%d,%d,%d,%d|%d|%d",
              plateau.nord[0], plateau.nord[1], plateau.nord[2],
              plateau.nord[3], plateau.nord[4], plateau.nord[5],
              plateau.sud[0], plateau.sud[1], plateau.sud[2],
              plateau.sud[3], plateau.sud[4], plateau.sud[5],
              plateau.scoreNord, plateau.scoreSud);
-
-    // return buffer;
 }
 
 // int main()
