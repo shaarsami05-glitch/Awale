@@ -456,8 +456,7 @@ void send_message_to_all_clients(Client *clients, Client sender, int actual, con
             snprintf(message, sizeof(message), "%s %s", sender.name, buffer);
          }
 
-         send(clients[i].sock, message,
-              strlen(message), 0);
+         send(clients[i].sock, message, strlen(message), 0);
       }
    }
 }
