@@ -346,6 +346,13 @@ void jouerCoup(Partie *partie, char *buffer, int joueur, int *erreur)
         strcpy(buffer, "Vous ne pouvez pas jouer dans ce camp !");
         return;
     }
+    // Case vide
+    if ((coordonnees[0] && plateau.sud[coordonnees[1]] == 0) || (!coordonnees[0] && plateau.nord[coordonnees[1]] == 0))
+    {
+        *erreur = 1;
+        strcpy(buffer, "Case vide. Veuillez rejouer");
+        return;
+    }
 
     Plateau sauvegardePlateau = plateau;
 
@@ -370,14 +377,14 @@ void jouerCoup(Partie *partie, char *buffer, int joueur, int *erreur)
         partie->statut = 0;
         strcpy(buffer, "Partie Terminee !");
     }
-    //changer de joueur
+    // changer de joueur
     partie->joueur = (partie->joueur + 1) % 2;
 
     strcpy(buffer, "Coup valide !");
     printf("FIN JouerCoup : %s\n", buffer);
 }
 
-void serializerPlateau(Plateau plateau, char* joueurNord, char* joueurSud, char *buffer)
+void serializerPlateau(Plateau plateau, char *joueurNord, char *joueurSud, char *buffer)
 // créer le buffer à envoyer aux clients
 {
     snprintf(buffer, 256, "%d,%d,%d,%d,%d,%d|%d,%d,%d,%d,%d,%d|%d|%d|%s|%s",

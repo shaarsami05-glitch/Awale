@@ -194,6 +194,10 @@ static int read_server(SOCKET sock, char *buffer)
       case 7: // MENU_SPECTATEUR
          afficherPartiesEnCours(donnees);
          break;
+      
+      case 8: // CHAT
+         printf("%s\n", donnees);
+         break;
 
       case 9:
          printf("%s\n", donnees);

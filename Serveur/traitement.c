@@ -28,7 +28,6 @@ void traiter_message(Client clients[], int actual, int indice, char *buffer)
 
    case EN_ATTENTE_DEFI:
       // Rien à faire
-      // traitement_en_cours();
       // traiter_attente_defi(client, buffer);
       break;
 
@@ -408,11 +407,6 @@ void traiter_en_partie(Client *client, char *buffer, Client clients[], int actua
 
    // Envoyer le plateau aux Spectateurs de la partie
    // TODO
-}
-
-void traitement_en_cours(void)
-{
-   printf("La fonction n'a pas encore été implémentée.\n");
 }
 
 void traiter_chat(Client *client, char *buffer, Client clients[], int actual)
