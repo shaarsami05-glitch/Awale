@@ -197,6 +197,10 @@ static int read_server(SOCKET sock, char *buffer)
       case 10:
          afficherSpectateur(donnees);
          break;
+      
+      case 11:
+         afficherSelfProfil(donnees);
+         break;
 
       default:
          printf("Erreur : %s\n", donnees);

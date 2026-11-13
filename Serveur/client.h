@@ -1,6 +1,8 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
+#define MAX_AMIS 20
+
 typedef int SOCKET;
 
 typedef enum
@@ -14,7 +16,10 @@ typedef enum
     MENU_SPECTATEUR = 7, 
     CHAT = 8,
     CHAT_PRIVE = 9, // Chat privé avec un user
-    SPECTATEUR = 10 // Spectateur d'une partie
+    SPECTATEUR = 10, // Spectateur d'une partie
+    SELF_PROFIL = 11,
+    BIO = 12,
+    AMIS = 13
 } EtatClient;
 
 typedef struct
@@ -30,6 +35,11 @@ typedef struct
     int adversaire; // idAdversaire --> EN_ATTENTE_DEFI et EN_PARTIE
 
     int partie; //idPartie --> EN_PARTIE et SPECTATEUR
+    
+    int prive; // Si prive == 1, limiter visibilité partie à ses amis
+
+    char amis[MAX_AMIS][32]; //liste des noms d'amis
+    int nbAmis;
 
 } Client;
 

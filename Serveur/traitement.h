@@ -51,5 +51,10 @@ void construire_liste_clients(Client *client, Client clients[], int actual, char
 static void envoyerPlateau(int sock, const char *plateauStr, int doitJouer, int erreur);
 void traiter_menu_spectateur(Client *client, char *buffer);
 void traiter_spectateur(Client *client, char *buffer);
+void traiter_self_profil(Client *client, char *buffer);
+void traiter_bio(Client *client, char *buffer);
+int estAmi(const Client *c, const char *nom);
+int ajouterAmi(Client *c, const char *nom);
+void traiter_amis(Client *client, char *buffer);
 
 #endif /* guard */

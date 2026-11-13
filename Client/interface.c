@@ -122,13 +122,18 @@ void afficherSpectateur(char *donnees)
 
 void afficherProfil(char *donnees)
 {
-    printf("=========== PROFIL DE %s ===========\n", donnees);
-    printf("Bio : Aucune bio pour le moment\n");
-    printf("1. Défier\n");
-    printf("2. Ajouter en ami\n");
-    printf("3. Chat\n");
-    printf("0. Retour\n");
-    printf("==============================\n");
+    char nom[100];
+    char bio[100];
+    if (sscanf(donnees, "%99[^|]|%99[^|\n]", nom, bio) == 2)
+    {
+        printf("=========== PROFIL DE %s ===========\n", nom);
+        printf("Bio : %s\n", bio);
+        printf("1. Défier\n");
+        printf("2. Ajouter en ami\n");
+        printf("3. Chat\n");
+        printf("0. Retour\n");
+        printf("==============================\n");
+    }
 }
 
 void afficherMenuConnecte()
@@ -137,7 +142,7 @@ void afficherMenuConnecte()
     printf("1. Voir utilisateurs connectes\n");
     printf("2. Voir parties en cours\n");
     printf("3. Chat general\n");
-    printf("4. Se deconnecter\n");
+    printf("4. Profil\n");
     printf("==============================\n");
 }
 
@@ -159,8 +164,7 @@ void afficherPropositionDefi(char *donnees)
 
 void afficherJeu(Plateau plateau, char *joueurNord, char *joueurSud)
 {
-    printf("------------ PLATEAU ------------\n");
-
+    printf("----------- PLATEAU -----------\n");
     printf("f e d c b a \n");
     for (int i = 0; i < 6; i++)
     {
@@ -204,6 +208,8 @@ void traiteEnPartie(char *donnees)
             if (deserializerPlateau(reste, &p, joueurNord, joueurSud))
             {
                 afficherJeu(p, joueurNord, joueurSud);
+                printf("/msg pour envoyer un message\n");
+                printf("/exit pour quitter la partie\n");
             }
         }
         else
@@ -214,5 +220,26 @@ void traiteEnPartie(char *donnees)
             printf("C'est à vous de jouer !\n");
         else
             printf("En attente de l'adversaire...\n");
+    }
+}
+
+void afficherSelfProfil(char *donnees)
+{
+    int prive;
+    char bio[100];
+    if (sscanf(donnees, "%d|%799[^\n]", &prive, bio) == 2)
+    {
+        printf("=========== PROFIL ===========\n");
+        printf("Bio : %s\n", bio);
+        printf("1. Modifier sa bio\n");
+        printf("2. Gérer ses amis\n");
+        printf("3. Changer de statut ");
+        if (prive)
+            printf("(prive)\n");
+        else
+            printf("(public)\n");
+
+        printf("0. Retour\n");
+        printf("==============================\n");
     }
 }

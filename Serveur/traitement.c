@@ -55,6 +55,16 @@ void traiter_message(Client clients[], int actual, int indice, char *buffer)
    case CHAT_PRIVE:
       traiter_chat_prive(client, buffer, clients, actual);
       break;
+
+   case SELF_PROFIL:
+      traiter_self_profil(client, buffer);
+      break;
+   case BIO:
+      traiter_bio(client, buffer);
+      break;
+   case AMIS:
+      traiter_amis(client, buffer);
+      break;
    }
 }
 
@@ -63,7 +73,7 @@ void traiter_menu(Client *client, char *buffer, Client clients[], int actual)
 //  printf("1. Voir utilisateurs connectes\n");
 //  printf("2. Voir parties en cours\n");
 //  printf("3. Chat general\n");
-//  printf("4. Se deconnecter\n");
+//  printf("4. Profil\n");
 //  printf("==============================\n");
 {
    printf("serv : en attente du choix du client %s\n", client->name);
@@ -93,6 +103,11 @@ void traiter_menu(Client *client, char *buffer, Client clients[], int actual)
       printf("DEBUG : entrée dans le chat\n");
       client->etat = CHAT;
       snprintf(buffer, BUF_SIZE, "%d|%s", CHAT, "Bienvenue dans le chat. Entrez \"exit\" pour quitter.");
+   }
+   else if (strcmp(buffer, "4") == 0)
+   {
+      client->etat = SELF_PROFIL;
+      snprintf(buffer, BUF_SIZE, "%d|%d|%s", SELF_PROFIL, client->prive, client->bio);
    }
    else
    {
@@ -151,7 +166,7 @@ void traiter_liste_clients(Client *client, char *buffer, Client clients[], int a
    client->adversaire = indice;
    client->etat = PROFIL;
 
-   snprintf(buffer, BUF_SIZE, "%d|%s", PROFIL, clients[indice].name);
+   snprintf(buffer, BUF_SIZE, "%d|%s|%s", PROFIL, clients[indice].name, clients[indice].bio);
 }
 
 void traiter_profil(Client *client, char *buffer, Client clients[], int indice, int actual)
@@ -165,11 +180,10 @@ void traiter_profil(Client *client, char *buffer, Client clients[], int indice, 
    printf("PROFIL buffer : %s\n", buffer);
    if (strcmp(buffer, "1") == 0)
    {
-      if (clients[client->adversaire].etat == EN_PARTIE)
+      if (clients[client->adversaire].etat == EN_PARTIE || clients[client->adversaire].etat == PROPOSITION_DEFI || clients[client->adversaire].etat == EN_ATTENTE_DEFI)
       {
          // Ne peut pas proposer une partie à qqn qui est déjà en train de jouer
-         // snprintf(buffer, BUF_SIZE, "%d|Utilisateur déjà en partie.", PROFIL);
-         strcpy(buffer, "Utilisateur déjà en partie");
+         strcpy(buffer, "Utilisateur non disponible");
          return;
       }
       // Envoyer une invitation de partie au client
@@ -293,7 +307,7 @@ void traiter_en_partie(Client *client, char *buffer, Client clients[], int actua
    {
       // Récupérer le type
       *separateur = '\0';
-      char* type = buffer;
+      char *type = buffer;
       printf("Type : %s\n", type);
 
       if (strcmp(type, "MESSAGE") == 0)
@@ -487,9 +501,7 @@ void construire_liste_clients(Client *client, Client clients[], int actual, char
          continue;
 
       char ligne[100];
-
       snprintf(ligne, sizeof(ligne), "%d. %s |", numero++, clients[i].name);
-
       strncat(buffer, ligne, BUF_SIZE - strlen(buffer) - 1);
 
       // printf("buffer : %s", buffer);
@@ -538,4 +550,78 @@ void traiter_spectateur(Client *client, char *buffer)
       construire_menu(buffer);
       return;
    }
+}
+
+void traiter_self_profil(Client *client, char *buffer)
+{ // Si t'écris 0 tu reviens au MENU
+   if (strcmp(buffer, "0") == 0)
+   {
+      client->etat = MENU;
+      construire_menu(buffer);
+      return;
+   }
+   else if (strcmp(buffer, "1") == 0)
+   {
+      client->etat = BIO;
+      snprintf(buffer, BUF_SIZE, "%d|Nouvelle bio :", CHAT_PRIVE);
+      return;
+   }
+   else if (strcmp(buffer, "2") == 0)
+   {
+      client->etat = AMIS;
+      snprintf(buffer, BUF_SIZE, "%d|", AMIS);
+      for (int i = 0; i < client->nbAmis; i++)
+      {
+         char ligne[100];
+         snprintf(ligne, sizeof(ligne), "%d. %s |", i, client->amis[i]);
+         strncat(buffer, ligne, BUF_SIZE - strlen(buffer) - 1);
+      }
+      return;
+   }
+   else if (strcmp(buffer, "3") == 0)
+   {
+      char msg[100];
+      if (client->prive)
+      {
+         client->prive = 0;
+         strcpy(msg, "Vous êtes désormais en PUBLIC, tout le monde peut voir vos parties");
+      }
+      else
+      {
+         client->prive = 1;
+         strcpy(msg, "Vous êtes désormais en PRIVE, seuls vos amis peuvent voir vos parties");
+      }
+      client->etat = MENU;
+      snprintf(buffer, BUF_SIZE, "%d|%s", MENU, msg);
+      return;
+   }
+}
+
+void traiter_bio(Client *client, char *buffer)
+{
+   strcpy(client->bio, buffer);
+   client->etat = MENU;
+   snprintf(buffer, BUF_SIZE, "%d|Bio modifiée !", MENU);
+}
+
+int estAmi(const Client *c, const char *nom)
+{
+   for (int i = 0; i < c->nbAmis; i++)
+      if (strcmp(c->amis[i], nom) == 0)
+         return 1;
+   return 0;
+}
+
+int ajouterAmi(Client *c, const char *nom)
+{
+   if (c->nbAmis >= MAX_AMIS || estAmi(c, nom))
+      return 0;
+   strncpy(c->amis[c->nbAmis], nom, sizeof(c->amis[0]) - 1);
+   c->amis[c->nbAmis][sizeof(c->amis[0]) - 1] = '\0';
+   c->nbAmis++;
+   return 1;
+}
+
+void traiter_amis(Client *client, char *buffer)
+{
 }

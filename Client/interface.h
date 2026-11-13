@@ -51,6 +51,7 @@ void afficherJeu(Plateau plateau, char* joueurNord, char* joueurSud);
 void traiteEnPartie(char *donnees);
 void afficherPartiesEnCours(char *donnees);
 void afficherSpectateur(char *donnees);
+void afficherSelfProfil(char *donnees);
 
 
 
