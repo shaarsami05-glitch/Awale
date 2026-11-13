@@ -109,11 +109,14 @@ void afficherSpectateur(char *donnees)
     printf("======== SPECTATEUR ========\n");
 
     Plateau p = {0};
-    if (deserializerPlateau(donnees, &p))
+    char joueurNord[100];
+    char joueurSud[100];
+    if (deserializerPlateau(donnees, &p, joueurNord, joueurSud))
     {
-        afficherJeu(p);
+        afficherJeu(p, joueurNord, joueurSud);
     }
     printf("Vous êtes spectateur de la partie\n");
+    printf("Tapez 0 pour quitter\n");
     printf("==============================\n");
 }
 
@@ -154,9 +157,8 @@ void afficherPropositionDefi(char *donnees)
     printf("==============================\n");
 }
 
-void afficherJeu(Plateau plateau)
+void afficherJeu(Plateau plateau, char *joueurNord, char *joueurSud)
 {
-
     printf("------------ PLATEAU ------------\n");
 
     printf("f e d c b a \n");
@@ -172,19 +174,19 @@ void afficherJeu(Plateau plateau)
     printf("\nA B C D E F\n");
     printf("-------------------------------\n");
     printf("------------ SCORE ------------\n");
-    printf("Joueur 0 (NORD) : %d\n", plateau.scoreNord);
-    printf("Joueur 1 (SUD) : %d\n", plateau.scoreSud);
+    printf("%s (NORD) : %d\n", joueurNord, plateau.scoreNord);
+    printf("%s (SUD) : %d\n", joueurSud, plateau.scoreSud);
     printf("-------------------------------\n");
 }
 
-int deserializerPlateau(const char *donnees, Plateau *p)
+int deserializerPlateau(const char *donnees, Plateau *p, char *joueurNord, char *joueurSud)
 {
-    return sscanf(donnees, "%d,%d,%d,%d,%d,%d|%d,%d,%d,%d,%d,%d|%d|%d",
+    return sscanf(donnees, "%d,%d,%d,%d,%d,%d|%d,%d,%d,%d,%d,%d|%d|%d|%99[^|]|%99[^|\n]",
                   &p->nord[0], &p->nord[1], &p->nord[2],
                   &p->nord[3], &p->nord[4], &p->nord[5],
                   &p->sud[0], &p->sud[1], &p->sud[2],
                   &p->sud[3], &p->sud[4], &p->sud[5],
-                  &p->scoreNord, &p->scoreSud) == 14; // 14 valeurs lues = succès
+                  &p->scoreNord, &p->scoreSud, joueurNord, joueurSud) == 16; // 16 valeurs lues = succès
 }
 
 void traiteEnPartie(char *donnees)
@@ -197,8 +199,12 @@ void traiteEnPartie(char *donnees)
         if (erreur == 0)
         {
             Plateau p = {0};
-            if (deserializerPlateau(reste, &p))
-                afficherJeu(p);
+            char joueurNord[100];
+            char joueurSud[100];
+            if (deserializerPlateau(reste, &p, joueurNord, joueurSud))
+            {
+                afficherJeu(p, joueurNord, joueurSud);
+            }
         }
         else
         {

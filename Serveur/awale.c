@@ -377,15 +377,15 @@ void jouerCoup(Partie *partie, char *buffer, int joueur, int *erreur)
     printf("FIN JouerCoup : %s\n", buffer);
 }
 
-void serializerPlateau(Plateau plateau, char *buffer)
+void serializerPlateau(Plateau plateau, char* joueurNord, char* joueurSud, char *buffer)
 // créer le buffer à envoyer aux clients
 {
-    snprintf(buffer, 256, "%d,%d,%d,%d,%d,%d|%d,%d,%d,%d,%d,%d|%d|%d",
+    snprintf(buffer, 256, "%d,%d,%d,%d,%d,%d|%d,%d,%d,%d,%d,%d|%d|%d|%s|%s",
              plateau.nord[0], plateau.nord[1], plateau.nord[2],
              plateau.nord[3], plateau.nord[4], plateau.nord[5],
              plateau.sud[0], plateau.sud[1], plateau.sud[2],
              plateau.sud[3], plateau.sud[4], plateau.sud[5],
-             plateau.scoreNord, plateau.scoreSud);
+             plateau.scoreNord, plateau.scoreSud, joueurNord, joueurSud);
 }
 
 // int main()
