@@ -287,7 +287,41 @@ void traiter_en_partie(Client *client, char *buffer, Client clients[], int actua
       joueur = 1; // Joueur Sud
    }
 
-   // Recevoir un coup, analyser sa validité, jouer le coup, renvoyer le plateau
+   // Vérifier si le joueur souhaite envoyer un message
+   char *separateur = strchr(buffer, '|');
+   if (separateur != NULL)
+   {
+      // Récupérer le type
+      *separateur = '\0';
+      char* type = buffer;
+      printf("Type : %s\n", type);
+
+      if (strcmp(type, "MESSAGE") == 0)
+      {
+         // Récupérer toutes les données après le séparateur
+         char *message = separateur + 1;
+         printf("Message : %s\n", message);
+
+         // Envoyer le message à l'adversaire
+         Client *adversaire;
+         if (joueur == 0)
+            adversaire = partie->joueurSud;
+         else
+            adversaire = partie->joueurNord;
+
+         char msg[BUF_SIZE];
+         snprintf(msg, sizeof(msg), "9|%s : %s", client->name, message);
+         send(adversaire->sock, msg, strlen(msg), 0);
+
+         return;
+      }
+      else
+      {
+         printf("Type de message inconnu : %s\n", type);
+      }
+   }
+
+   // Sinon, il s'agit d'un coup normal
    int erreur = 0;
    jouerCoup(partie, buffer, joueur, &erreur);
 
@@ -338,6 +372,10 @@ void traiter_en_partie(Client *client, char *buffer, Client clients[], int actua
    char message[100];
    snprintf(message, sizeof(message), "%d|%d|%d|%s \n", EN_PARTIE, 0, 0, buffer);
    strcpy(buffer, message);
+   // snprintf(buffer, BUF_SIZE, "%d|%d|%d|%s", EN_PARTIE, 0, 0, buffer);
+
+   // Envoyer le plateau aux Spectateurs de la partie
+   // TODO
 }
 
 void traitement_en_cours(void)
@@ -426,9 +464,10 @@ void traiter_chat_prive(Client *client, char *buffer, Client clients[], int actu
       strcpy(buffer, "Erreur lors de l'envoi.");
       return;
    }
+   buffer[0] = '\0'; // remettre buffer vide
 
    // tant qu'on a pas ecrit exit, on reste dans le chat privé
-   snprintf(buffer, BUF_SIZE, "%d|%s", CHAT_PRIVE, "Message envoyé.");
+   // snprintf(buffer, BUF_SIZE, "%d|%s", CHAT_PRIVE, "Message envoyé.");
 }
 
 void construire_menu(char *buffer)
