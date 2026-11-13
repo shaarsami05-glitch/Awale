@@ -186,12 +186,16 @@ static int read_server(SOCKET sock, char *buffer)
          traiteEnPartie(donnees);
          break;
 
-      case 7:
-         printf("%s\n", donnees);
+      case 7: //MENU_SPECTATEUR
+         afficherPartiesEnCours(donnees);
          break;
 
       case 9:
          printf("%s\n", donnees);
+         break;
+
+      case 10:
+         afficherSpectateur(donnees);
          break;
 
       default:

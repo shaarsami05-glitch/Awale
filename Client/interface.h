@@ -49,6 +49,8 @@ void afficherPropositionDefi(char* donnees);
 int deserializerPlateau(const char *donnees, Plateau *p);
 void afficherJeu(Plateau plateau);
 void traiteEnPartie(char *donnees);
+void afficherPartiesEnCours(char *donnees);
+void afficherSpectateur(char *donnees);
 
 
 

@@ -11,9 +11,10 @@ typedef enum
     EN_ATTENTE_DEFI = 4, // Défier un user
     PROPOSITION_DEFI = 5, //Recevoir défi
     EN_PARTIE = 6, // Défi accepté
-    SPECTATEUR = 7, // Spectateur d'une partie
+    MENU_SPECTATEUR = 7, 
     CHAT = 8,
-    CHAT_PRIVE = 9 // Chat privé avec un user
+    CHAT_PRIVE = 9, // Chat privé avec un user
+    SPECTATEUR = 10 // Spectateur d'une partie
 } EtatClient;
 
 typedef struct

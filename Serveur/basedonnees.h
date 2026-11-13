@@ -40,5 +40,6 @@ typedef struct in_addr IN_ADDR;
 
 Partie *initialiserPartie(Client *joueurA, Client *joueurB);
 Partie *getPartieParId(int id);
+int getPartiesEnCours(Partie** partiesEnCours);
 
 #endif /* guard */
