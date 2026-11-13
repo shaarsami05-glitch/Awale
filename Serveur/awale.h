@@ -41,7 +41,7 @@ Plateau deplacerGraines(int *coordonnees, Plateau plateau);
 int estAffame(Plateau plateau, int joueur);
 void nourrirAdversaire(Plateau plateau, int joueur);
 void lancerJeu();
-void serializerPlateau(Plateau plateau, char *buffer);
+void serializerPlateau(Plateau plateau, char* joueurNord, char* joueurSud, char *buffer);
 void jouerCoup(Partie *partie, char *buffer, int joueur, int *erreur);
 
 #endif

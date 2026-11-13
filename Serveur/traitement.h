@@ -5,14 +5,14 @@
 
 #include <winsock2.h>
 
-#elif defined (linux)
+#elif defined(linux)
 
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h> /* close */
-#include <netdb.h> /* gethostbyname */
+#include <netdb.h>  /* gethostbyname */
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
 #define closesocket(s) close(s)
@@ -27,11 +27,11 @@ typedef struct in_addr IN_ADDR;
 
 #endif
 
-#define CRLF        "\r\n"
-#define PORT         1977
-#define MAX_CLIENTS     100
+#define CRLF "\r\n"
+#define PORT 1977
+#define MAX_CLIENTS 100
 
-#define BUF_SIZE    1024
+#define BUF_SIZE 1024
 
 #include "client.h"
 #include "awale.h"
@@ -49,7 +49,7 @@ void traiter_chat_prive(Client *client, char *buffer, Client clients[], int actu
 void construire_menu(char *buffer);
 void construire_liste_clients(Client *client, Client clients[], int actual, char *buffer);
 static void envoyerPlateau(int sock, const char *plateauStr, int doitJouer, int erreur);
-void traiter_menu_spectateur(Client* client, char* buffer);
-
+void traiter_menu_spectateur(Client *client, char *buffer);
+void traiter_spectateur(Client *client, char *buffer);
 
 #endif /* guard */

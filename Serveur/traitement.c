@@ -33,14 +33,17 @@ void traiter_message(Client clients[], int actual, int indice, char *buffer)
       break;
 
    case EN_PARTIE:
-      printf("EN_PARTIE\n");
       traiter_en_partie(client, buffer, clients, actual);
       break;
 
    case MENU_SPECTATEUR:
+      printf("MENU_SPECTATEUR\n");
       traiter_menu_spectateur(client, buffer);
       break;
 
+   case SPECTATEUR:
+      traiter_spectateur(client, buffer);
+      break;
    case CHAT:
       traiter_chat(client, buffer, clients, actual);
       break;
@@ -235,11 +238,11 @@ void traiter_proposition_defi(Client *client, char *buffer, Client clients[])
       clients[client->adversaire].partie = partie->id;
 
       // Sérialiser le plateau
-      serializerPlateau(partie->plateau, buffer);
+      serializerPlateau(partie->plateau, partie->joueurNord->name, partie->joueurSud->name, buffer);
 
       envoyerPlateau(partie->joueurSud->sock, buffer, partie->joueur == 1, 0); // 1 si c'est à Sud
-     
-      // Afficher le nom du joueur au lieu de Joueur 1 
+
+      // Afficher le nom du joueur au lieu de Joueur 1
       char msg[512];
       snprintf(msg, sizeof(msg), "%d|%d|%d|%s\n", EN_PARTIE, 0, partie->joueur == 0, buffer);
       strcpy(buffer, msg);
@@ -291,7 +294,7 @@ void traiter_en_partie(Client *client, char *buffer, Client clients[], int actua
    if (!partie->statut)
    { // Partie Terminee
       // Ajouter status fin de partie ? Rejouer...
-      // RE?VOYER LE PLATEAU 
+      // RE?VOYER LE PLATEAU
       client->etat = MENU;
       clients[client->adversaire].etat = MENU;
 
@@ -313,7 +316,8 @@ void traiter_en_partie(Client *client, char *buffer, Client clients[], int actua
       return;
    }
 
-   serializerPlateau(partie->plateau, buffer); // contient seulement "4,4,4,4,4,4|4,4,4,4,4,4|0|0"
+   serializerPlateau(partie->plateau, partie->joueurNord->name, partie->joueurSud->name, buffer);
+   // contient seulement "4,4,4,4,4,4|4,4,4,4,4,4|0|0"
 
    // Envoyer le plateau aux Spectateurs de la partie
    for (int i = 0; i < actual; i++)
@@ -460,7 +464,7 @@ void traiter_menu_spectateur(Client *client, char *buffer)
 // 0. Retour
 // ==============================
 {
-   printf("traiter_menu_spectateur buffer : %s", buffer);
+   printf("traiter_menu_spectateur buffer : %s\n", buffer);
    if (strcmp(buffer, "0") == 0)
    {
       client->etat = MENU;
@@ -479,5 +483,20 @@ void traiter_menu_spectateur(Client *client, char *buffer)
       }
       client->partie = p->id;
       client->etat = SPECTATEUR;
+      // snprintf(buffer, BUF_SIZE, "%d|", SPECTATEUR);
+      serializerPlateau(p->plateau, p->joueurNord->name, p->joueurSud->name, buffer); // contient seulement "4,4,4,4,4,4|4,4,4,4,4,4|0|0"
+      char msg[100];
+      snprintf(msg, sizeof(msg), "%d|%s", SPECTATEUR, buffer);
+      strcpy(buffer, msg);
+   }
+}
+
+void traiter_spectateur(Client *client, char *buffer)
+{ // Si t'écris 0 tu reviens au MENU
+   if (strcmp(buffer, "0") == 0)
+   {
+      client->etat = MENU;
+      construire_menu(buffer);
+      return;
    }
 }
