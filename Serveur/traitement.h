@@ -39,7 +39,6 @@ typedef struct in_addr IN_ADDR;
 void traiter_message(Client clients[], int actual, int indice, char *buffer);
 void traiter_menu(Client *client, char *buffer, Client clients[], int actual);
 void traiter_liste_clients(Client *client, char *buffer, Client clients[], int actual);
-void traitement_en_cours(void);
 void traiter_profil(Client *client, char *buffer, Client clients[], int indice, int actual);
 void traiter_proposition_defi(Client *client, char *buffer, Client clients[]);
 void traiter_en_partie(Client *client, char *buffer, Client clients[], int actual);

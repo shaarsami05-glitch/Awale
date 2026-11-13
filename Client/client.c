@@ -34,7 +34,31 @@ static void app(const char *address, const char *name)
 
    /* send our name */
    write_server(sock, name);
-   afficherMenuConnecte(); // 0 pour menu de connexion, 1 pour menu connecté
+   read_server(sock, buffer); // read the server response
+   if (strcmp(buffer, "PSEUDO_DEJA_UTILISE") == 0)
+   {
+      printf("Pseudo déjà utilisé !\n");
+      end_connection(sock);
+      exit(EXIT_FAILURE);
+   }
+   else if (strcmp(buffer, "SERVEUR_COMPLET") == 0)
+   {
+      printf("Le serveur est complet !\n");
+      end_connection(sock);
+      exit(EXIT_FAILURE);
+   }
+   else if (strcmp(buffer, "CONNEXION_OK") == 0)
+   {
+      printf("Pseudo accepté !\n");
+   }
+   else
+   {
+      printf("Réponse inattendue du serveur : %s\n", buffer);
+      end_connection(sock);
+      exit(EXIT_FAILURE);
+   }
+
+   afficherMenuConnecte();
 
    while (1)
    {
@@ -71,11 +95,16 @@ static void app(const char *address, const char *name)
 
             write_server(sock, message);
          }
+         else if (strcmp(buffer, "/exit") == 0)
+         {
+            write_server(sock, "EXIT|");
+         }
          else
          {
             write_server(sock, buffer);
          }
       }
+
       // lorsque le serveur envoie un message, on l'affiche
       else if (FD_ISSET(sock, &rdfs))
       {
@@ -186,8 +215,12 @@ static int read_server(SOCKET sock, char *buffer)
          traiteEnPartie(donnees);
          break;
 
-      case 7: //MENU_SPECTATEUR
+      case 7: // MENU_SPECTATEUR
          afficherPartiesEnCours(donnees);
+         break;
+      
+      case 8: // CHAT
+         printf("%s\n", donnees);
          break;
 
       case 9:

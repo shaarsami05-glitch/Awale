@@ -28,7 +28,6 @@ void traiter_message(Client clients[], int actual, int indice, char *buffer)
 
    case EN_ATTENTE_DEFI:
       // Rien à faire
-      // traitement_en_cours();
       // traiter_attente_defi(client, buffer);
       break;
 
@@ -329,6 +328,34 @@ void traiter_en_partie(Client *client, char *buffer, Client clients[], int actua
 
          return;
       }
+      else if (strcmp(type, "EXIT") == 0)
+      {
+         Client *adversaire;
+
+         if (joueur == 0)
+            adversaire = partie->joueurSud;
+         else
+            adversaire = partie->joueurNord;
+
+         // Informer l'adversaire et lui afficher le menu
+         char msg[BUF_SIZE];
+
+         snprintf(msg, sizeof(msg), "%d|%s a quitté la partie. Retour au menu.", MENU, client->name);
+
+         send(adversaire->sock, msg, strlen(msg), 0);
+
+         // Terminer la partie
+         partie->statut = 0;
+
+         // Retour au menu pour les deux joueurs
+         client->etat = MENU;
+         adversaire->etat = MENU;
+
+         // Retour au menu du joueur qui quitte
+         construire_menu(buffer);
+
+         return;
+      }
       else
       {
          printf("Type de message inconnu : %s\n", type);
@@ -340,9 +367,14 @@ void traiter_en_partie(Client *client, char *buffer, Client clients[], int actua
    jouerCoup(partie, buffer, joueur, &erreur);
 
    if (!partie->statut)
-   { // Partie Terminee
+   {
+      // Partie Terminee
       // Ajouter status fin de partie ? Rejouer...
-      // RE?VOYER LE PLATEAU
+      // RENVOYER LE PLATEAU
+
+      // Mettre fin à la partie
+      partie->statut = 0;
+
       client->etat = MENU;
       clients[client->adversaire].etat = MENU;
 
@@ -351,8 +383,7 @@ void traiter_en_partie(Client *client, char *buffer, Client clients[], int actua
       char message[BUF_SIZE];
       construire_menu(message);
 
-      send(clients[client->adversaire].sock,
-           message, strlen(message), 0);
+      send(clients[client->adversaire].sock, message, strlen(message), 0);
 
       return;
    }
@@ -392,11 +423,6 @@ void traiter_en_partie(Client *client, char *buffer, Client clients[], int actua
    // TODO
 }
 
-void traitement_en_cours(void)
-{
-   printf("La fonction n'a pas encore été implémentée.\n");
-}
-
 void traiter_chat(Client *client, char *buffer, Client clients[], int actual)
 {
    // si le message est exit on quiite le chat, sinon on envoie le message à tous les clients connectés
@@ -431,17 +457,14 @@ void send_message_to_all_clients(Client *clients, Client sender, int actual, con
 
          if (from_server == 0)
          {
-            snprintf(message, sizeof(message),
-                     "%s : %s", sender.name, buffer);
+            snprintf(message, sizeof(message), "%s : %s", sender.name, buffer);
          }
          else
          {
-            snprintf(message, sizeof(message),
-                     "%s %s", sender.name, buffer);
+            snprintf(message, sizeof(message), "%s %s", sender.name, buffer);
          }
 
-         send(clients[i].sock, message,
-              strlen(message), 0);
+         send(clients[i].sock, message, strlen(message), 0);
       }
    }
 }

@@ -85,6 +85,22 @@ static void app(void)
             continue;
          }
 
+         // Vérification du pseudo
+         if (pseudo_existe(clients, actual, buffer))
+         {
+            write_client(csock, "PSEUDO_DEJA_UTILISE");
+            closesocket(csock);
+            continue;
+         }
+
+         // Vérification du nombre maximal de clients
+         if (actual >= MAX_CLIENTS)
+         {
+            write_client(csock, "SERVEUR_COMPLET");
+            closesocket(csock);
+            continue;
+         }
+
          /* what is the new maximum fd ? */
          max = csock > max ? csock : max;
 
@@ -99,6 +115,7 @@ static void app(void)
 
          clients[actual] = c;
          actual++;
+         write_client(csock, "CONNEXION_OK");
       }
       else
       {
@@ -122,7 +139,7 @@ static void app(void)
                }
                else /*logique métier à developper */
                {
-                  //traitement.c
+                  // traitement.c
                   traiter_message(clients, actual, i, buffer); // qui serait un switch case pour le menu
                   write_client(clients[i].sock, buffer);
 
@@ -213,6 +230,19 @@ static void write_client(SOCKET sock, const char *buffer)
       perror("send()");
       exit(errno);
    }
+}
+
+int pseudo_existe(Client *clients, int actual, char *pseudo)
+{
+   for (int i = 0; i < actual; i++)
+   {
+      if (strcmp(clients[i].name, pseudo) == 0)
+      {
+         return 1; // Pseudo déjà utilisé
+      }
+   }
+
+   return 0; // Pseudo disponible
 }
 
 int main(int argc, char **argv)

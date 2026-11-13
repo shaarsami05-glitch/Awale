@@ -162,26 +162,68 @@ void afficherPropositionDefi(char *donnees)
     printf("==============================\n");
 }
 
+
 void afficherJeu(Plateau plateau, char *joueurNord, char *joueurSud)
 {
-    printf("----------- PLATEAU -----------\n");
-    printf("f e d c b a \n");
+    printf("\n");
+    printf("                    A W A L E\n");
+    printf("====================================================\n");
+
+    // Informations joueur nord
+    printf("  JOUEUR NORD : %-20s SCORE : %02d\n",
+           joueurNord, plateau.scoreNord);
+
+    printf("\n");
+
+    // Coordonnees nord
+    printf("          f      e      d      c      b      a\n");
+
+    printf("       +------+------+------+------+------+------+ \n");
+
+    // Rangee nord (de F vers A)
+    printf("       |");
+
+    for (int i = 5; i >= 0; i--)
+    {
+        printf("  %02d  |", plateau.nord[i]);
+    }
+
+    printf("\n");
+
+    printf("       +------+------+------+------+------+------+ \n");
+
+    // Separation centrale
+    printf("       |                                      |\n");
+    printf("       |             PLATEAU AWALÉ            |\n");
+    printf("       |                                      |\n");
+
+    printf("       +------+------+------+------+------+------+ \n");
+
+    // Rangee sud (de A vers F)
+    printf("       |");
+
     for (int i = 0; i < 6; i++)
     {
-        printf("%d ", plateau.nord[5 - i]);
+        printf("  %02d  |", plateau.sud[i]);
     }
+
     printf("\n");
-    for (int j = 0; j < 6; j++)
-    {
-        printf("%d ", plateau.sud[j]);
-    }
-    printf("\nA B C D E F\n");
-    printf("-------------------------------\n");
-    printf("------------ SCORE ------------\n");
-    printf("%s (NORD) : %d\n", joueurNord, plateau.scoreNord);
-    printf("%s (SUD) : %d\n", joueurSud, plateau.scoreSud);
-    printf("-------------------------------\n");
+
+    printf("       +------+------+------+------+------+------+ \n");
+
+    // Coordonnees sud
+    printf("          A      B      C      D      E      F\n");
+
+    printf("\n");
+
+    // Informations joueur sud
+    printf("  JOUEUR SUD  : %-20s SCORE : %02d\n",
+           joueurSud, plateau.scoreSud);
+
+    printf("\n");
+    printf("====================================================\n");
 }
+
 
 int deserializerPlateau(const char *donnees, Plateau *p, char *joueurNord, char *joueurSud)
 {
