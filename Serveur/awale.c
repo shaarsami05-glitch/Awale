@@ -317,8 +317,6 @@ void jouerCoup(Partie *partie, char *buffer, int joueur, int *erreur)
     }
     // afficherJeu(plateau);
 
-    int coordonnees[2];
-
     // Vérifier coups légaux :
 
     // Une seule lettre
@@ -329,34 +327,29 @@ void jouerCoup(Partie *partie, char *buffer, int joueur, int *erreur)
         strcpy(buffer, "Ecrire une seule lettre svp");
         return;
     }
-    else
-    {
-        // lettreJouee est [A , F] union [a, f]
-        convertis(coordonnees, buffer[0]);
+    // lettreJouee est [A , F] union [a, f]
+    int coordonnees[2];
+    convertis(coordonnees, buffer[0]);
 
-        // Chaque joueur joue sa propre lettre
-        if (coordonnees[0] == joueur) // Nord = 0 et Sud = 1
-        {
-            // Verifier case non vide
-            if ((coordonnees[0] && plateau.sud[coordonnees[1]] == 0) || (!coordonnees[0] && plateau.nord[coordonnees[1]] == 0))
-            {
-                *erreur = 1;
-                strcpy(buffer, "Case vide. Veuillez rejouer");
-                return;
-            }
-        }
-        else
-        {
-            *erreur = 1;
-            strcpy(buffer, "Coup invalide veuillez rejouer");
-            return;
-        }
+    // Chaque joueur joue sa propre lettre
+    // Vérification de la lettre
+    if (coordonnees[0] == 2)
+    {
+        *erreur = 1;
+        strcpy(buffer, "Case invalide !");
+        return;
     }
+    // Vérification du camp
+    if (coordonnees[0] != joueur)
+    {
+        *erreur = 1;
+        strcpy(buffer, "Vous ne pouvez pas jouer dans ce camp !");
+        return;
+    }
+
     Plateau sauvegardePlateau = plateau;
 
     plateau = deplacerGraines(coordonnees, plateau);
-
-    partie->plateau = plateau;
 
     // Prévenir la famine (= obligé de nourrir son adversaire => si toutes les cases adverses sont vides, obligé de le nourrir)
     if (estAffame(plateau, joueur))
@@ -368,12 +361,19 @@ void jouerCoup(Partie *partie, char *buffer, int joueur, int *erreur)
         return;
     }
 
+    // Enregistrer le nouveau plateau
+    partie->plateau = plateau;
+
+    // verifier si un joueur a gagné
     if (plateau.scoreNord > 24 || plateau.scoreSud > 24)
     {
         partie->statut = 0;
         strcpy(buffer, "Partie Terminee !");
     }
+    //changer de joueur
     partie->joueur = (partie->joueur + 1) % 2;
+
+    strcpy(buffer, "Coup valide !");
     printf("FIN JouerCoup : %s\n", buffer);
 }
 

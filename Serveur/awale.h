@@ -29,12 +29,6 @@ typedef struct
     Client **spectateurs;
 } Partie;
 
-typedef enum
-{
-    PLATEAU = 0,
-    MESSAGE = 1,
-} TypeMessage;
-
 void convertis(int *res, char lettre);
 void afficherJeu(Plateau plateau);
 void afficherScore(Plateau plateau);

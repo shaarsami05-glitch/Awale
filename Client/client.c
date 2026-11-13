@@ -56,21 +56,25 @@ static void app(const char *address, const char *name)
       // quand on tape sur le clavier, on envoie le message au serveur
       if (FD_ISSET(STDIN_FILENO, &rdfs))
       {
-         fgets(buffer, BUF_SIZE - 1, stdin);
+         if (fgets(buffer, BUF_SIZE - 1, stdin) == NULL)
+            continue;
+
+         // Supprimer le retour à la ligne
+         buffer[strcspn(buffer, "\n")] = '\0';
+
+         // Détecter la commande /msg
+         if (strncmp(buffer, "/msg ", 5) == 0)
          {
-            char *p = NULL;
-            p = strstr(buffer, "\n");
-            if (p != NULL)
-            {
-               *p = 0;
-            }
-            else
-            {
-               /* fclean */
-               buffer[BUF_SIZE - 1] = 0;
-            }
+            char message[BUF_SIZE];
+
+            snprintf(message, sizeof(message), "MESSAGE|%s", buffer + 5);
+
+            write_server(sock, message);
          }
-         write_server(sock, buffer);
+         else
+         {
+            write_server(sock, buffer);
+         }
       }
       // lorsque le serveur envoie un message, on l'affiche
       else if (FD_ISSET(sock, &rdfs))
