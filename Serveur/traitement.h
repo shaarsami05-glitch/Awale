@@ -54,6 +54,7 @@ void traiter_self_profil(Client *client, char *buffer);
 void traiter_bio(Client *client, char *buffer);
 int estAmi(const Client *c, const char *nom);
 int ajouterAmi(Client *c, const char *nom);
-void traiter_amis(Client *client, char *buffer);
+int retirerAmi(Client *c, const char *nom);
+void retourSelfProfil(Client *client, char *buffer);
 
 #endif /* guard */

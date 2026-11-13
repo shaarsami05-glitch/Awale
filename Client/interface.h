@@ -52,6 +52,7 @@ void traiteEnPartie(char *donnees);
 void afficherPartiesEnCours(char *donnees);
 void afficherSpectateur(char *donnees);
 void afficherSelfProfil(char *donnees);
+void afficherListeAmis(char* donnees);
 
 
 

@@ -124,12 +124,16 @@ void afficherProfil(char *donnees)
 {
     char nom[100];
     char bio[100];
-    if (sscanf(donnees, "%99[^|]|%99[^|\n]", nom, bio) == 2)
+    int estAmi;
+    if (sscanf(donnees, "%d|%99[^|]|%99[^|\n]", &estAmi, nom, bio) == 3)
     {
         printf("=========== PROFIL DE %s ===========\n", nom);
         printf("Bio : %s\n", bio);
         printf("1. Défier\n");
-        printf("2. Ajouter en ami\n");
+        if (estAmi)
+            printf("2. Retirer des amis\n");
+        else
+            printf("2. Ajouter en ami\n");
         printf("3. Chat\n");
         printf("0. Retour\n");
         printf("==============================\n");
@@ -161,7 +165,6 @@ void afficherPropositionDefi(char *donnees)
     printf("2. Décliner\n");
     printf("==============================\n");
 }
-
 
 void afficherJeu(Plateau plateau, char *joueurNord, char *joueurSud)
 {
@@ -224,7 +227,6 @@ void afficherJeu(Plateau plateau, char *joueurNord, char *joueurSud)
     printf("====================================================\n");
 }
 
-
 int deserializerPlateau(const char *donnees, Plateau *p, char *joueurNord, char *joueurSud)
 {
     return sscanf(donnees, "%d,%d,%d,%d,%d,%d|%d,%d,%d,%d,%d,%d|%d|%d|%99[^|]|%99[^|\n]",
@@ -274,7 +276,7 @@ void afficherSelfProfil(char *donnees)
         printf("=========== PROFIL ===========\n");
         printf("Bio : %s\n", bio);
         printf("1. Modifier sa bio\n");
-        printf("2. Gérer ses amis\n");
+        printf("2. Voir ses amis\n");
         printf("3. Changer de statut ");
         if (prive)
             printf("(prive)\n");
@@ -284,4 +286,26 @@ void afficherSelfProfil(char *donnees)
         printf("0. Retour\n");
         printf("==============================\n");
     }
+}
+
+void afficherListeAmis(char* donnees)
+{
+    printf("========= LISTE AMIS =========\n");
+
+    for (char *p = donnees; *p != '\0'; p++)
+    {
+        if (*p == '|')
+            putchar('\n');
+        else
+            putchar(*p);
+    }
+
+    // Terminer la dernière ligne si elle ne finit pas déjà par un séparateur
+    size_t len = strlen(donnees);
+    if (len > 0 && donnees[len - 1] != '|')
+        putchar('\n');
+
+    printf("0. Retour\n");
+    printf("==============================\n");
+
 }

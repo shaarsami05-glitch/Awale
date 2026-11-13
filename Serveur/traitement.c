@@ -36,7 +36,6 @@ void traiter_message(Client clients[], int actual, int indice, char *buffer)
       break;
 
    case MENU_SPECTATEUR:
-      printf("MENU_SPECTATEUR\n");
       traiter_menu_spectateur(client, buffer);
       break;
 
@@ -62,7 +61,7 @@ void traiter_message(Client clients[], int actual, int indice, char *buffer)
       traiter_bio(client, buffer);
       break;
    case AMIS:
-      traiter_amis(client, buffer);
+      retourSelfProfil(client, buffer);
       break;
    }
 }
@@ -92,9 +91,22 @@ void traiter_menu(Client *client, char *buffer, Client clients[], int actual)
       int nbEnCours = getPartiesEnCours(partiesEnCours);
       for (int i = 0; i < nbEnCours; i++)
       {
-         char ligne[100];
-         snprintf(ligne, sizeof(ligne), "%d. %s VS %s |", partiesEnCours[i]->id + 1, partiesEnCours[i]->joueurNord->name, partiesEnCours[i]->joueurSud->name);
-         strncat(buffer, ligne, BUF_SIZE - strlen(buffer) - 1);
+         // Verifier qu'on est dans la liste d'amis des joueurs s'ils sont en privés
+         int amiNord, amiSud = 1;
+         if (partiesEnCours[i]->joueurNord->prive)
+         {
+            amiNord = estAmi(partiesEnCours[i]->joueurNord, client->name);
+         }
+         if (partiesEnCours[i]->joueurSud->prive)
+         {
+            amiSud = estAmi(partiesEnCours[i]->joueurSud, client->name);
+         }
+         if (amiNord && amiSud)
+         {
+            char ligne[100];
+            snprintf(ligne, sizeof(ligne), "%d. %s VS %s |", partiesEnCours[i]->id + 1, partiesEnCours[i]->joueurNord->name, partiesEnCours[i]->joueurSud->name);
+            strncat(buffer, ligne, BUF_SIZE - strlen(buffer) - 1);
+         }
       }
    }
    else if (strcmp(buffer, "3") == 0)
@@ -165,7 +177,7 @@ void traiter_liste_clients(Client *client, char *buffer, Client clients[], int a
    client->adversaire = indice;
    client->etat = PROFIL;
 
-   snprintf(buffer, BUF_SIZE, "%d|%s|%s", PROFIL, clients[indice].name, clients[indice].bio);
+   snprintf(buffer, BUF_SIZE, "%d|%d|%s|%s", PROFIL, estAmi(client, clients[indice].name), clients[indice].name, clients[indice].bio);
 }
 
 void traiter_profil(Client *client, char *buffer, Client clients[], int indice, int actual)
@@ -209,8 +221,20 @@ void traiter_profil(Client *client, char *buffer, Client clients[], int indice, 
    }
    else if (strcmp(buffer, "2") == 0)
    {
-      // Ajouter en ami
-      strcpy(buffer, "Fonctionnalité non implémentée.");
+      if (estAmi(client, clients[client->adversaire].name))
+      {
+         // Retirer des amis
+         int retire = retirerAmi(client, clients[client->adversaire].name);
+         client->etat = MENU;
+         snprintf(buffer, BUF_SIZE, "%d|%s", client->etat, retire ? "Ami retiré !" : "Probleme dans la suppression");
+      }
+      else
+      {
+         // Ajouter aux amis
+         int ajoute = ajouterAmi(client, clients[client->adversaire].name);
+         client->etat = MENU;
+         snprintf(buffer, BUF_SIZE, "%d|%s", client->etat, ajoute ? "Ami ajouté !" : "Probleme dans l'ajout");
+      }
    }
    else if (strcmp(buffer, "3") == 0)
    {
@@ -596,7 +620,7 @@ void traiter_self_profil(Client *client, char *buffer)
       for (int i = 0; i < client->nbAmis; i++)
       {
          char ligne[100];
-         snprintf(ligne, sizeof(ligne), "%d. %s |", i, client->amis[i]);
+         snprintf(ligne, sizeof(ligne), "- %s |", client->amis[i]);
          strncat(buffer, ligne, BUF_SIZE - strlen(buffer) - 1);
       }
       return;
@@ -645,6 +669,28 @@ int ajouterAmi(Client *c, const char *nom)
    return 1;
 }
 
-void traiter_amis(Client *client, char *buffer)
+int retirerAmi(Client *c, const char *nom)
 {
+   for (int i = 0; i < c->nbAmis; i++)
+   {
+      if (strcmp(c->amis[i], nom) == 0)
+      {
+         // Décaler les amis suivants d'une case vers la gauche
+         for (int j = i; j < c->nbAmis - 1; j++)
+            strcpy(c->amis[j], c->amis[j + 1]);
+
+         c->nbAmis--;
+         return 1; // retiré
+      }
+   }
+   return 0; // pas trouvé
+}
+
+void retourSelfProfil(Client *client, char *buffer)
+{
+   if (strcmp(buffer, "0") == 0)
+   {
+      client->etat = SELF_PROFIL;
+      snprintf(buffer, BUF_SIZE, "%d|%d|%s", SELF_PROFIL, client->prive, client->bio);
+   }
 }
