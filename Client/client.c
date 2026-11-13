@@ -71,11 +71,16 @@ static void app(const char *address, const char *name)
 
             write_server(sock, message);
          }
+         else if (strcmp(buffer, "/exit") == 0)
+         {
+            write_server(sock, "EXIT|");
+         }
          else
          {
             write_server(sock, buffer);
          }
       }
+
       // lorsque le serveur envoie un message, on l'affiche
       else if (FD_ISSET(sock, &rdfs))
       {
@@ -186,7 +191,7 @@ static int read_server(SOCKET sock, char *buffer)
          traiteEnPartie(donnees);
          break;
 
-      case 7: //MENU_SPECTATEUR
+      case 7: // MENU_SPECTATEUR
          afficherPartiesEnCours(donnees);
          break;
 
