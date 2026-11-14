@@ -293,9 +293,6 @@ void traiter_proposition_defi(Client *client, char *buffer, Client clients[])
       char msg[512];
       snprintf(msg, sizeof(msg), "%d|%d|%d|%s\n", EN_PARTIE, 0, partie->joueur == 0, buffer);
       strcpy(buffer, msg);
-
-      printf("Statut client  A : %d\n", client->etat);
-      printf("Statut client  B : %d\n", clients[client->adversaire].etat);
    }
    else if (strcmp(buffer, "2") == 0)
    {
@@ -370,6 +367,7 @@ void traiter_en_partie(Client *client, char *buffer, Client clients[], int actua
          // L'adversaire gagne par forfait
          strcpy(partie->gagnant, adversaire->name);
          partie->statut = TERMINEE;
+         sauvegarderPartieFichier(partie);
 
          char msg[BUF_SIZE];
          snprintf(msg, sizeof(msg), "%d|%s a quitte la partie (forfait). Retour au menu.", MENU, client->name);
@@ -413,6 +411,7 @@ void traiter_en_partie(Client *client, char *buffer, Client clients[], int actua
    // Cas 1 : La partie vient de se terminer
    if (partie->statut == TERMINEE)
    {
+      sauvegarderPartieFichier(partie);
       Client *adversaire = (joueur == 0) ? partie->joueurSud : partie->joueurNord;
 
       // Notifier les spectateurs et les remettre au MENU

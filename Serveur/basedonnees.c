@@ -81,3 +81,80 @@ int getPartiesTermineesJoueur(const char *nomJoueur, Partie **partiesJoueur)
     return count;
 }
 
+void sauvegarderPartieFichier(const Partie *partie)
+{
+    FILE *f = fopen(FICHIER_HISTORIQUE, "a");
+    if (f == NULL)
+    {
+        perror("fopen sauvegarde historique");
+        return;
+    }
+
+    const char *coupsStr = (partie->nbCoups > 0) ? partie->coups : "-";
+    const char *gagnantStr = (strlen(partie->gagnant) > 0) ? partie->gagnant : "INCONNU";
+
+    fprintf(f, "%s|%s|%d|%d|%s|%d|%s\n",
+            partie->nomNord,
+            partie->nomSud,
+            partie->plateau.scoreNord,
+            partie->plateau.scoreSud,
+            gagnantStr,
+            partie->nbCoups,
+            coupsStr);
+
+    fclose(f);
+}
+
+void chargerPartiesFichier(void)
+{
+    FILE *f = fopen(FICHIER_HISTORIQUE, "r");
+    if (f == NULL)
+    {
+        // Le fichier n'existe pas encore au tout premier lancement : ce n'est pas une erreur
+        return;
+    }
+
+    char ligne[512];
+    while (fgets(ligne, sizeof(ligne), f) != NULL && nbParties < MAX_PARTIES)
+    {
+        // Supprimer le saut de ligne
+        ligne[strcspn(ligne, "\r\n")] = '\0';
+        if (strlen(ligne) == 0)
+            continue;
+
+        Partie p = {0};
+        char coupsTemp[MAX_COUPS] = "";
+
+        if (sscanf(ligne, "%31[^|]|%31[^|]|%d|%d|%31[^|]|%d|%255s",
+                   p.nomNord,
+                   p.nomSud,
+                   &p.plateau.scoreNord,
+                   &p.plateau.scoreSud,
+                   p.gagnant,
+                   &p.nbCoups,
+                   coupsTemp) == 7)
+        {
+            p.id = nbParties;
+            p.statut = TERMINEE;
+            p.joueurNord = NULL;
+            p.joueurSud = NULL;
+
+            if (strcmp(coupsTemp, "-") == 0)
+            {
+                p.coups[0] = '\0';
+                p.nbCoups = 0;
+            }
+            else
+            {
+                strncpy(p.coups, coupsTemp, MAX_COUPS - 1);
+                p.coups[MAX_COUPS - 1] = '\0';
+            }
+
+            parties[nbParties++] = p;
+        }
+    }
+
+    fclose(f);
+    printf("Historique charge : %d partie(s) recuperee(s).\n", nbParties);
+}
+

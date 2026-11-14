@@ -16,6 +16,7 @@ static void init(void)
       exit(EXIT_FAILURE);
    }
 #endif
+chargerPartiesFichier();
 }
 
 static void end(void)
