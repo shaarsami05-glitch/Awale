@@ -5,7 +5,6 @@
 
 #include "traitement.h"
 #include "basedonnees.h"
-// #include "serveur.h"
 
 void traiter_message(Client clients[], int actual, int indice, char *buffer)
 {
@@ -53,7 +52,6 @@ void traiter_message(Client clients[], int actual, int indice, char *buffer)
    case CHAT_PRIVE:
       traiter_chat_prive(client, buffer, clients, actual);
       break;
-
    case SELF_PROFIL:
       traiter_self_profil(client, buffer);
       break;
@@ -62,6 +60,15 @@ void traiter_message(Client clients[], int actual, int indice, char *buffer)
       break;
    case AMIS:
       retourSelfProfil(client, buffer);
+      break;
+   case HISTORIQUE:
+      traiter_historique(client, buffer);
+      break;
+   case REPLAY:
+      traiter_replay(client, buffer);
+      break;
+   default : // afficher le MENU par defaut
+      traiter_menu(client, buffer, clients, actual);
       break;
    }
 }
@@ -388,7 +395,15 @@ void traiter_en_partie(Client *client, char *buffer, Client clients[], int actua
 
    // Sinon, il s'agit d'un coup normal
    int erreur = 0;
+   char coupJoue = buffer[0];
    jouerCoup(partie, buffer, joueur, &erreur);
+
+   if (erreur == 0 && partie->nbCoups < MAX_COUPS - 1)
+   {
+      partie->coups[partie->nbCoups++] = coupJoue;
+      partie->coups[partie->nbCoups] = '\0';
+   }
+   printf("Historique partie %d (%d coups) : %s\n", partie->id, partie->nbCoups, partie->coups);
 
    if (!partie->statut)
    {
@@ -642,6 +657,32 @@ void traiter_self_profil(Client *client, char *buffer)
       snprintf(buffer, BUF_SIZE, "%d|%s", MENU, msg);
       return;
    }
+   else if (strcmp(buffer, "4") == 0)
+   {
+      client->etat = HISTORIQUE;
+      snprintf(buffer, BUF_SIZE, "%d|", HISTORIQUE);
+
+      Partie *partiesJoueur[MAX_PARTIES];
+      int nb = getPartiesTermineesJoueur(client->name, partiesJoueur);
+
+      if (nb == 0)
+      {
+         strncat(buffer, "Aucune partie jouee.|", BUF_SIZE - strlen(buffer) - 1);
+      }
+      else
+      {
+         for (int i = 0; i < nb; i++)
+         {
+            char ligne[128];
+            snprintf(ligne, sizeof(ligne), "%d. %s (%d) VS %s (%d) |",
+                     i + 1,
+                     partiesJoueur[i]->nomNord, partiesJoueur[i]->plateau.scoreNord,
+                     partiesJoueur[i]->nomSud, partiesJoueur[i]->plateau.scoreSud);
+            strncat(buffer, ligne, BUF_SIZE - strlen(buffer) - 1);
+         }
+      }
+      return;
+   }
 }
 
 void traiter_bio(Client *client, char *buffer)
@@ -693,4 +734,92 @@ void retourSelfProfil(Client *client, char *buffer)
       client->etat = SELF_PROFIL;
       snprintf(buffer, BUF_SIZE, "%d|%d|%s", SELF_PROFIL, client->prive, client->bio);
    }
+}
+
+void traiter_historique(Client *client, char *buffer)
+{
+    if (strcmp(buffer, "0") == 0)
+    {
+        client->etat = SELF_PROFIL;
+        snprintf(buffer, BUF_SIZE, "%d|%d|%s", SELF_PROFIL, client->prive, client->bio);
+        return;
+    }
+
+    int choix = atoi(buffer);
+    Partie *partiesJoueur[MAX_PARTIES];
+    int nb = getPartiesTermineesJoueur(client->name, partiesJoueur);
+
+    if (choix <= 0 || choix > nb)
+    {
+        strcpy(buffer, "Choix invalide.\n");
+        return;
+    }
+
+    Partie *p = partiesJoueur[choix - 1];
+    client->etat = REPLAY;
+    client->replayPartieId = p->id;
+    client->replayEtape = 0; // On commence au plateau initial (coup 0)
+
+    construireMessageReplay(client, p, buffer);
+}
+
+void traiter_replay(Client *client, char *buffer)
+{
+    Partie *p = getPartieParId(client->replayPartieId);
+    if (p == NULL)
+    {
+        client->etat = MENU;
+        construire_menu(buffer);
+        return;
+    }
+
+    if (strcmp(buffer, "0") == 0)
+    {
+        // Retour à la liste de l'historique des parties
+        client->etat = HISTORIQUE;
+        snprintf(buffer, BUF_SIZE, "%d|", HISTORIQUE);
+
+        Partie *partiesJoueur[MAX_PARTIES];
+        int nb = getPartiesTermineesJoueur(client->name, partiesJoueur);
+        if (nb == 0)
+        {
+            strncat(buffer, "Aucune partie jouee.|", BUF_SIZE - strlen(buffer) - 1);
+        }
+        else
+        {
+            for (int i = 0; i < nb; i++)
+            {
+                char ligne[128];
+                snprintf(ligne, sizeof(ligne), "%d. %s (%d) VS %s (%d) |",
+                         i + 1,
+                         partiesJoueur[i]->nomNord, partiesJoueur[i]->plateau.scoreNord,
+                         partiesJoueur[i]->nomSud, partiesJoueur[i]->plateau.scoreSud);
+                strncat(buffer, ligne, BUF_SIZE - strlen(buffer) - 1);
+            }
+        }
+        return;
+    }
+    else if (strcmp(buffer, "n") == 0 || strcmp(buffer, "N") == 0)
+    {
+        if (client->replayEtape < p->nbCoups)
+            client->replayEtape++;
+    }
+    else if (strcmp(buffer, "p") == 0 || strcmp(buffer, "P") == 0)
+    {
+        if (client->replayEtape > 0)
+            client->replayEtape--;
+    }
+
+    construireMessageReplay(client, p, buffer);
+}
+
+static void construireMessageReplay(Client *client, const Partie *p, char *buffer)
+{
+    Plateau plateauEtape = construirePlateauEtape(p, client->replayEtape);
+    char plateauStr[256];
+    serializerPlateau(plateauEtape, (char *)p->nomNord, (char *)p->nomSud, plateauStr);
+
+    char coupActuel = (client->replayEtape == 0) ? '-' : p->coups[client->replayEtape - 1];
+
+    snprintf(buffer, BUF_SIZE, "%d|%d|%d|%c|%s", REPLAY, client->replayEtape, p->nbCoups, coupActuel, plateauStr);
 }

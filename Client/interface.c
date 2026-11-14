@@ -282,6 +282,7 @@ void afficherSelfProfil(char *donnees)
             printf("(prive)\n");
         else
             printf("(public)\n");
+        printf("4. Historique des parties\n");
 
         printf("0. Retour\n");
         printf("==============================\n");
@@ -308,4 +309,56 @@ void afficherListeAmis(char* donnees)
     printf("0. Retour\n");
     printf("==============================\n");
 
+}
+
+void afficherHistorique(char *donnees)
+{
+    printf("===== HISTORIQUE PARTIES =====\n");
+    printf("Choisissez une partie à revoir :\n");
+
+    for (char *p = donnees; *p != '\0'; p++)
+    {
+        if (*p == '|')
+            putchar('\n');
+        else
+            putchar(*p);
+    }
+
+    size_t len = strlen(donnees);
+    if (len > 0 && donnees[len - 1] != '|')
+        putchar('\n');
+
+    printf("0. Retour\n");
+    printf("==============================\n");
+}
+
+void afficherReplay(char *donnees)
+{
+    int etape, totalCoups;
+    char coup;
+    char reste[800] = "";
+
+    if (sscanf(donnees, "%d|%d|%c|%799[^\n]", &etape, &totalCoups, &coup, reste) == 4)
+    {
+        printf("=========== REPLAY ===========\n");
+        if (etape == 0)
+            printf("Position initiale (Coup 0 / %d)\n", totalCoups);
+        else
+            printf("Coup %d / %d (Case jouee : %c)\n", etape, totalCoups, coup);
+
+        Plateau p = {0};
+        char joueurNord[100];
+        char joueurSud[100];
+        if (deserializerPlateau(reste, &p, joueurNord, joueurSud))
+        {
+            afficherJeu(p, joueurNord, joueurSud);
+        }
+
+        if (etape < totalCoups)
+            printf("[n] Coup suivant  ");
+        if (etape > 0)
+            printf("[p] Coup precedent  ");
+        printf("[0] Retour historique\n");
+        printf("==============================\n");
+    }
 }

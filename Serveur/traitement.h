@@ -56,5 +56,9 @@ int estAmi(const Client *c, const char *nom);
 int ajouterAmi(Client *c, const char *nom);
 int retirerAmi(Client *c, const char *nom);
 void retourSelfProfil(Client *client, char *buffer);
+void traiter_historique(Client *client, char *buffer);
+void traiter_replay(Client *client, char *buffer);
+void traiter_replay(Client *client, char *buffer);
+static void construireMessageReplay(Client *client, const Partie *p, char *buffer);
 
 #endif /* guard */

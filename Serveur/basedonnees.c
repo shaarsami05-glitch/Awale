@@ -27,6 +27,16 @@ Partie *initialiserPartie(Client *joueurA, Client *joueurB)
 
     partie->joueurNord = joueurA;
     partie->joueurSud = joueurB;
+
+    // Nouveaux paramètres pour la sauvegarde ---------------------
+    strncpy(partie->nomNord, joueurA->name, sizeof(partie->nomNord) - 1);
+    partie->nomNord[sizeof(partie->nomNord) - 1] = '\0';
+    strncpy(partie->nomSud, joueurB->name, sizeof(partie->nomSud) - 1);
+    partie->nomSud[sizeof(partie->nomSud) - 1] = '\0';
+    partie->nbCoups = 0;
+    partie->coups[0] = '\0';
+    // -------------------------------------------------------------
+
     partie->joueur = rand() % 2; // Détermine aléatoirement le joueur qui commence
     partie->statut = EN_COURS;
 
@@ -58,5 +68,18 @@ int getPartiesEnCours(Partie** partiesEnCours)
         }
     }
     return nbPartiesEnCours;
+}
+
+int getPartiesTermineesJoueur(const char *nomJoueur, Partie **partiesJoueur)
+{
+    int count = 0;
+    for (int i = 0; i < nbParties; i++)
+    {
+        if (parties[i].statut == TERMINEE && (strcmp(parties[i].nomNord, nomJoueur) == 0 || strcmp(parties[i].nomSud, nomJoueur) == 0))
+        {
+            partiesJoueur[count++] = &parties[i];
+        }
+    }
+    return count;
 }
 
