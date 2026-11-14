@@ -45,7 +45,7 @@ typedef struct
     
     // pouvoir revoir une partie
     int replayPartieId; // ID de la partie en cours de revisionnage
-    int replayEtape;    // Numéro du coup actuel (0 = plateau initial, 1 = après 1er coup, etc.)
+    int replayEtape;    // Numéro du coup actuel k (0 = plateau initial, 1 = après 1er coup, etc.)
 
 } Client;
 

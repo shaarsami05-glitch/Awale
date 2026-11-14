@@ -4,7 +4,6 @@
 #ifdef WIN32
 
 #include <winsock2.h>
-#include "interface.h"
 
 #elif defined (linux)
 

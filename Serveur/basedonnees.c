@@ -28,14 +28,12 @@ Partie *initialiserPartie(Client *joueurA, Client *joueurB)
     partie->joueurNord = joueurA;
     partie->joueurSud = joueurB;
 
-    // Nouveaux paramètres pour la sauvegarde ---------------------
     strncpy(partie->nomNord, joueurA->name, sizeof(partie->nomNord) - 1);
     partie->nomNord[sizeof(partie->nomNord) - 1] = '\0';
     strncpy(partie->nomSud, joueurB->name, sizeof(partie->nomSud) - 1);
     partie->nomSud[sizeof(partie->nomSud) - 1] = '\0';
     partie->nbCoups = 0;
     partie->coups[0] = '\0';
-    // -------------------------------------------------------------
 
     partie->joueur = rand() % 2; // Détermine aléatoirement le joueur qui commence
     partie->statut = EN_COURS;
@@ -58,7 +56,6 @@ Partie *getPartieParId(int id)
 
 int getPartiesEnCours(Partie** partiesEnCours)
 {
-    //Partie **partiesEnCours;
     int nbPartiesEnCours = 0;
     for (int i = 0; i < nbParties; i++)
     {

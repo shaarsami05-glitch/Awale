@@ -65,40 +65,24 @@ void afficherUtilisateurs(char *donnees)
 {
     printf("======== UTILISATEURS ========\n");
 
-    for (char *p = donnees; *p != '\0'; p++)
+    if (strlen(donnees) == 0)
     {
-        if (*p == '|')
-            putchar('\n');
-        else
-            putchar(*p);
+        printf("Aucun autre joueur connecte pour le moment.\n");
     }
-
-    // Terminer la dernière ligne si elle ne finit pas déjà par un séparateur
-    size_t len = strlen(donnees);
-    if (len > 0 && donnees[len - 1] != '|')
-        putchar('\n');
-
-    printf("0. Retour\n");
-    printf("==============================\n");
-}
-
-void afficherPartiesEnCours(char *donnees)
-{
-    printf("====== PARTIES EN COURS ======\n");
-    printf("Choisissez une partie à regarder\n");
-
-    for (char *p = donnees; *p != '\0'; p++)
+    else
     {
-        if (*p == '|')
-            putchar('\n');
-        else
-            putchar(*p);
-    }
+        for (char *p = donnees; *p != '\0'; p++)
+        {
+            if (*p == '|')
+                putchar('\n');
+            else
+                putchar(*p);
+        }
 
-    // Terminer la dernière ligne si elle ne finit pas déjà par un séparateur
-    size_t len = strlen(donnees);
-    if (len > 0 && donnees[len - 1] != '|')
-        putchar('\n');
+        size_t len = strlen(donnees);
+        if (len > 0 && donnees[len - 1] != '|')
+            putchar('\n');
+    }
 
     printf("0. Retour\n");
     printf("==============================\n");
@@ -289,44 +273,84 @@ void afficherSelfProfil(char *donnees)
     }
 }
 
-void afficherListeAmis(char* donnees)
+void afficherListeAmis(char *donnees)
 {
     printf("========= LISTE AMIS =========\n");
 
-    for (char *p = donnees; *p != '\0'; p++)
+    if (strlen(donnees) == 0)
     {
-        if (*p == '|')
-            putchar('\n');
-        else
-            putchar(*p);
+        printf("Vous n'avez aucun ami pour le moment.\n");
     }
+    else
+    {
+        for (char *p = donnees; *p != '\0'; p++)
+        {
+            if (*p == '|')
+                putchar('\n');
+            else
+                putchar(*p);
+        }
 
-    // Terminer la dernière ligne si elle ne finit pas déjà par un séparateur
-    size_t len = strlen(donnees);
-    if (len > 0 && donnees[len - 1] != '|')
-        putchar('\n');
+        size_t len = strlen(donnees);
+        if (len > 0 && donnees[len - 1] != '|')
+            putchar('\n');
+    }
 
     printf("0. Retour\n");
     printf("==============================\n");
+}
 
+void afficherPartiesEnCours(char *donnees)
+{
+    printf("====== PARTIES EN COURS ======\n");
+
+    if (strlen(donnees) == 0)
+    {
+        printf("Aucune partie en cours disponible.\n");
+    }
+    else
+    {
+        printf("Choisissez une partie a regarder :\n");
+        for (char *p = donnees; *p != '\0'; p++)
+        {
+            if (*p == '|')
+                putchar('\n');
+            else
+                putchar(*p);
+        }
+
+        size_t len = strlen(donnees);
+        if (len > 0 && donnees[len - 1] != '|')
+            putchar('\n');
+    }
+
+    printf("0. Retour\n");
+    printf("==============================\n");
 }
 
 void afficherHistorique(char *donnees)
 {
     printf("===== HISTORIQUE PARTIES =====\n");
-    printf("Choisissez une partie à revoir :\n");
 
-    for (char *p = donnees; *p != '\0'; p++)
+    if (strlen(donnees) == 0)
     {
-        if (*p == '|')
-            putchar('\n');
-        else
-            putchar(*p);
+        printf("Aucune partie jouee pour le moment.\n");
     }
+    else
+    {
+        printf("Choisissez une partie a revoir :\n");
+        for (char *p = donnees; *p != '\0'; p++)
+        {
+            if (*p == '|')
+                putchar('\n');
+            else
+                putchar(*p);
+        }
 
-    size_t len = strlen(donnees);
-    if (len > 0 && donnees[len - 1] != '|')
-        putchar('\n');
+        size_t len = strlen(donnees);
+        if (len > 0 && donnees[len - 1] != '|')
+            putchar('\n');
+    }
 
     printf("0. Retour\n");
     printf("==============================\n");

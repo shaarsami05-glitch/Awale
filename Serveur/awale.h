@@ -33,12 +33,9 @@ typedef struct
 } Partie;
 
 void convertis(int *res, char lettre);
-void afficherJeu(Plateau plateau);
-void afficherScore(Plateau plateau);
 Plateau deplacerGraines(int *coordonnees, Plateau plateau);
 int estAffame(Plateau plateau, int joueur);
 void nourrirAdversaire(Plateau plateau, int joueur);
-void lancerJeu();
 void serializerPlateau(Plateau plateau, char* joueurNord, char* joueurSud, char *buffer);
 void jouerCoup(Partie *partie, char *buffer, int joueur, int *erreur);
 Plateau construirePlateauEtape(const Partie *partie, int etape);

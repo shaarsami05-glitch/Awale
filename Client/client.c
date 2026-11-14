@@ -95,6 +95,7 @@ static void app(const char *address, const char *name)
 
             write_server(sock, message);
          }
+         // Détecter la commande /exit
          else if (strcmp(buffer, "/exit") == 0)
          {
             write_server(sock, "EXIT|");
@@ -173,19 +174,8 @@ static int read_server(SOCKET sock, char *buffer)
    buffer[n] = '\0';
 
    int type;
-   char donnees[BUF_SIZE];
+   char donnees[BUF_SIZE] = "";
 
-   //  // Rechercher le séparateur entre le type et les données
-   //  char *separateur = strchr(buffer, '|');
-
-   //  if (separateur != NULL)
-   //  {
-   //      // Récupérer le type
-   //      *separateur = '\0';
-   //      type = atoi(buffer);
-
-   //      // Récupérer toutes les données après le séparateur
-   //      snprintf(donnees, sizeof(donnees), "%s", separateur + 1);
    if (sscanf(buffer, "%d|%899[^\n]", &type, donnees) >= 1)
    {
       switch (type)
@@ -234,12 +224,15 @@ static int read_server(SOCKET sock, char *buffer)
       case 11:
          afficherSelfProfil(donnees);
          break;
+
       case 13:
          afficherListeAmis(donnees);
          break;
+
       case 14:
          afficherHistorique(donnees);
          break;
+         
       case 15:
          afficherReplay(donnees);
          break;

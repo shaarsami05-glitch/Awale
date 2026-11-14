@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "awale.h"
-#include "basedonnees.h"
-#include "client.h"
 
 // int nord[6] = [4,4,4,4,4,4];
 // int sud[6] = [4,4,4,4,4,4];
@@ -11,6 +9,7 @@
 // int joueur = 1  => SUD;
 
 void convertis(int *res, char lettre)
+// permet de faire l'équivalence entre la lettre et l'indice du plateau
 {
     // printf("Appel convertis\n");
     if (lettre >= 'a' && lettre <= 'f')
@@ -30,44 +29,9 @@ void convertis(int *res, char lettre)
     }
 }
 
-void afficherJeu(Plateau plateau)
-{
-
-    printf("------------ PLATEAU ------------\n");
-
-    printf("f e d c b a \n");
-    for (int i = 0; i < 6; i++)
-    {
-        printf("%d ", plateau.nord[5 - i]);
-    }
-    printf("\n");
-    for (int j = 0; j < 6; j++)
-    {
-        printf("%d ", plateau.sud[j]);
-    }
-    printf("\nA B C D E F\n");
-    printf("-------------------------------\n");
-    printf("------------ SCORE ------------\n");
-    printf("Joueur 0 (NORD) : %d\n", plateau.scoreNord);
-    printf("Joueur 1 (SUD) : %d\n", plateau.scoreSud);
-    printf("-------------------------------\n");
-}
-
-void afficherScore(Plateau plateau)
-{
-    printf("------------ SCORE ------------\n");
-    printf("Joueur 0 (NORD) : %d\n", plateau.scoreNord);
-    printf("Joueur 1 (SUD) : %d\n", plateau.scoreSud);
-    printf("-------------------------------\n");
-}
-
 Plateau deplacerGraines(int *coordonnees, Plateau plateau)
 // Ne jamais metttre de graines dans la case jouée
 {
-    printf("Appel deplacerGraines\n");
-
-    // int *coordonnees = convertis(&coupJoue);
-
     int *nord = plateau.nord;
     int *sud = plateau.sud;
 
@@ -93,11 +57,10 @@ Plateau deplacerGraines(int *coordonnees, Plateau plateau)
                 nbGraines--;
             }
 
-            i = ++i % 12;
+            i = (i + 1) % 12;
         }
 
         //  Tant que les cases du joueur adverse contiennent 2 ou 3 graines :
-        // printf("i avant : %d\n", i);
         if (i == 0)
         {
             i = 12;
@@ -128,7 +91,7 @@ Plateau deplacerGraines(int *coordonnees, Plateau plateau)
                 sud[i % 6]++;
                 nbGraines--;
             }
-            i = ++i % 12;
+            i = (i+1) % 12;
         }
 
         if (i == 0)
@@ -208,105 +171,9 @@ void nourrirAdversaire(Plateau plateau, int joueur)
     }
 }
 
-void lancerJeu()
-{
-    int estTermine = 0;
-    int i = 0;
-
-    // int nord[6] = {1, 0, 0, 0, 0, 0};
-    // int sud[6] = {4, 4, 4, 4, 4, 1};
-    // int scoreNord = 0;
-    // int scoreSud = 0;
-    // Plateau plateau = {nord, sud, scoreNord, scoreSud};
-
-    Plateau plateau;
-    for (int k = 0; k < 6; k++)
-    {
-        plateau.nord[k] = 4;
-        plateau.sud[k] = 4;
-    }
-    plateau.scoreNord = 0;
-    plateau.scoreSud = 0;
-
-    afficherJeu(plateau);
-
-    char ligne[10];
-
-    while (!estTermine && i++ < 100)
-    {
-        // Si un joueur n'a plus de billes dans son camp, l'autre s'empare des dernieres graines
-        nourrirAdversaire(plateau, i % 2);
-
-        int estValide = 0;
-        int coordonnees[2];
-        while (!estValide)
-        {
-            // Vérifier coups légaux :
-            printf("Joueur %d : ", i % 2);
-            if (!fgets(ligne, sizeof ligne, stdin))
-                continue;
-            printf("%c\n", ligne[0]);
-
-            // Une seule lettre
-            if (ligne[1] != '\n')
-            {
-                printf("Ecrire une seule lettre svp\n");
-            }
-            else
-            {
-                printf("else \n");
-                // lettreJouee est [A , F] union [a, f]
-                convertis(coordonnees, ligne[0]);
-
-                // Chaque joueur joue sa propre lettre
-                if (coordonnees[0] == i % 2) // Nord = 0 et Sud = 1 (SUD commence)
-                {
-                    // Verifier case non vide
-                    if (coordonnees[0] && plateau.sud[coordonnees[1]] != 0)
-                    {
-                        estValide = 1;
-                    }
-                    else if (!coordonnees[0] && plateau.nord[coordonnees[1]] != 0)
-                    {
-                        estValide = 1;
-                    }
-                    else
-                    {
-                        printf("Case vide. Veuillez rejouer\n");
-                    }
-                }
-                else
-                {
-                    printf("Coup invalide veuillez rejouer\n");
-                }
-            }
-        }
-        printf("plateau\n");
-
-        Plateau sauvegardePlateau = plateau;
-
-        plateau = deplacerGraines(coordonnees, plateau);
-
-        // Prévenir la famine (= obligé de nourrir son adversaire => si toutes les cases adverses sont vides, obligé de le nourrir)
-        if (estAffame(plateau, i % 2))
-        {
-            // Restaurer le plateau
-            plateau = sauvegardePlateau;
-            i--;
-        }
-        afficherJeu(plateau);
-        afficherScore(plateau);
-        if (plateau.scoreNord > 24 || plateau.scoreSud > 24)
-        {
-            estTermine = 1;
-            printf("Partie terminee \n");
-        }
-    }
-}
-
 void jouerCoup(Partie *partie, char *buffer, int joueur, int *erreur)
+// verifier que le coup est faisable puis l'appliquer
 {
-    printf("jouerCoup buffer : %s\n", buffer);
     // Analyse le buffer
     Plateau plateau = partie->plateau;
     if (joueur != partie->joueur)
@@ -315,7 +182,6 @@ void jouerCoup(Partie *partie, char *buffer, int joueur, int *erreur)
         strcpy(buffer, "Ce n'est pas votre tour !\n");
         return;
     }
-    // afficherJeu(plateau);
 
     // Vérifier coups légaux :
 
@@ -396,6 +262,7 @@ void serializerPlateau(Plateau plateau, char *joueurNord, char *joueurSud, char 
 }
 
 Plateau construirePlateauEtape(const Partie *partie, int etape)
+// permet de review une game en se baladant selon les coups joués à l'étape k
 {
     Plateau plateau;
     for (int k = 0; k < 6; k++)

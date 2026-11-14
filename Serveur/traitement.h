@@ -34,7 +34,7 @@ typedef struct in_addr IN_ADDR;
 #define BUF_SIZE 1024
 
 #include "client.h"
-#include "awale.h"
+#include "basedonnees.h"
 
 void traiter_message(Client clients[], int actual, int indice, char *buffer);
 void traiter_menu(Client *client, char *buffer, Client clients[], int actual);
@@ -47,7 +47,6 @@ void send_message_to_all_clients(Client *clients, Client client, int actual, con
 void traiter_chat_prive(Client *client, char *buffer, Client clients[], int actual);
 void construire_menu(char *buffer);
 void construire_liste_clients(Client *client, Client clients[], int actual, char *buffer);
-static void envoyerPlateau(int sock, const char *plateauStr, int doitJouer, int erreur);
 void traiter_menu_spectateur(Client *client, char *buffer);
 void traiter_spectateur(Client *client, char *buffer);
 void traiter_self_profil(Client *client, char *buffer);
@@ -59,6 +58,5 @@ void retourSelfProfil(Client *client, char *buffer);
 void traiter_historique(Client *client, char *buffer);
 void traiter_replay(Client *client, char *buffer);
 void traiter_replay(Client *client, char *buffer);
-static void construireMessageReplay(Client *client, const Partie *p, char *buffer);
 
 #endif /* guard */

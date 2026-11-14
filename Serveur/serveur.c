@@ -137,13 +137,11 @@ static void app(void)
                   strncat(buffer, " disconnected !", BUF_SIZE - strlen(buffer) - 1);
                   send_message_to_all_clients(clients, client, actual, buffer, 1);
                }
-               else /*logique métier à developper */
+               else /*logique métier */
                {
                   // traitement.c
-                  traiter_message(clients, actual, i, buffer); // qui serait un switch case pour le menu
+                  traiter_message(clients, actual, i, buffer); // qui est un switch case pour le menu
                   write_client(clients[i].sock, buffer);
-
-                  // send_message_to_all_clients(clients, client, actual, buffer, 0);
                }
                break;
             }
@@ -245,7 +243,7 @@ int pseudo_existe(Client *clients, int actual, char *pseudo)
    return 0; // Pseudo disponible
 }
 
-int main(int argc, char **argv)
+int main(void)
 {
    init();
 
