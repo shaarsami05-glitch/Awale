@@ -1,1 +1,7 @@
 Alice|BOB|0|0|Alice|4|AbFd
+Charlie|BOB|21|26|BOB|59|CaDeFaEdFbAfFcFfEdFeBdCeDfFbEaAdFcCfDeFfEbFaAdBfAbBcCeDfEdF
+Charlie|BOB|0|0|BOB|4|bAfE
+BOB|Charlie|0|0|Charlie|0|-
+Charlie|BOB|0|0|BOB|0|-
+Pascal|Charlie|0|0|Pascal|0|-
+Pascal|Charlie|0|0|Charlie|0|-

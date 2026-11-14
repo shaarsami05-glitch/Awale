@@ -132,6 +132,7 @@ static void app(void)
                /* client disconnected */
                if (c == 0)
                {
+                  gerer_deconnexion(&clients[i], clients, actual);
                   closesocket(clients[i].sock);
                   remove_client(clients, i, &actual);
                   strncpy(buffer, client.name, BUF_SIZE - 1);

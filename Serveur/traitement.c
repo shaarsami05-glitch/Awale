@@ -402,6 +402,18 @@ void traiter_en_partie(Client *client, char *buffer, Client clients[], int actua
          snprintf(msg, sizeof(msg), "%d|%s a quitte la partie (forfait). Retour au menu.", MENU, client->name);
          send(adversaire->sock, msg, strlen(msg), 0);
 
+         // Renvoyer tous les spectateurs de cette partie au menu
+         for (int i = 0; i < actual; i++)
+         {
+            if (clients[i].etat == SPECTATEUR && clients[i].partie == partie->id)
+            {
+               char msgSpec[BUF_SIZE];
+               snprintf(msgSpec, sizeof(msgSpec), "%d|%s a quitte la partie. Retour au menu.", MENU, client->name);
+               send(clients[i].sock, msgSpec, strlen(msgSpec), 0);
+               clients[i].etat = MENU;
+            }
+         }
+
          // Retour au menu principal
          client->etat = MENU;
          adversaire->etat = MENU;
@@ -756,6 +768,10 @@ void retourSelfProfil(Client *client, char *buffer)
       client->etat = SELF_PROFIL;
       snprintf(buffer, BUF_SIZE, "%d|%d|%s", SELF_PROFIL, client->prive, client->bio);
    }
+   else
+   {
+      strcpy(buffer, "Choix invalide. Tapez 0 pour revenir au profil.");
+   }
 }
 
 static void construireMessageReplay(Client *client, const Partie *p, char *buffer)
@@ -848,5 +864,63 @@ void traiter_classement(Client *client, char *buffer)
    {
       client->etat = MENU;
       construire_menu(buffer);
+   }
+}
+
+void gerer_deconnexion(Client *client, Client clients[], int actual)
+{
+   if (client->etat == EN_PARTIE)
+   {
+      Partie *partie = getPartieParId(client->partie);
+      if (partie != NULL && partie->statut == EN_COURS)
+      {
+         Client *adversaire = (client->sock == partie->joueurNord->sock)
+                                  ? partie->joueurSud
+                                  : partie->joueurNord;
+
+         if (adversaire != NULL)
+         {
+            // L'adversaire gagne par forfait
+            strcpy(partie->gagnant, adversaire->name);
+            partie->statut = TERMINEE;
+            sauvegarderPartieFichier(partie);
+
+            // Informer l'adversaire et le renvoyer au menu
+            char msg[BUF_SIZE];
+            snprintf(msg, sizeof(msg), "%d|%s s'est deconnecte (forfait). Retour au menu.", MENU, client->name);
+            send(adversaire->sock, msg, strlen(msg), 0);
+
+            adversaire->etat = MENU;
+         }
+
+         // Si des spectateurs regardaient cette partie, les renvoyer au menu aussi
+         for (int i = 0; i < actual; i++)
+         {
+            if (clients[i].sock != client->sock &&
+                clients[i].etat == SPECTATEUR &&
+                clients[i].partie == partie->id)
+            {
+               char msgSpec[BUF_SIZE];
+               snprintf(msgSpec, sizeof(msgSpec), "%d|%s s'est deconnecte. Fin de la partie.", MENU, client->name);
+               send(clients[i].sock, msgSpec, strlen(msgSpec), 0);
+               clients[i].etat = MENU;
+            }
+         }
+      }
+   }
+   else if (client->etat == EN_ATTENTE_DEFI || client->etat == PROPOSITION_DEFI)
+   {
+      // Débloquer l'autre joueur s'il attendait une réponse au défi
+      if (client->adversaire >= 0 && client->adversaire < actual)
+      {
+         Client *autre = &clients[client->adversaire];
+         if (autre->etat == EN_ATTENTE_DEFI || autre->etat == PROPOSITION_DEFI)
+         {
+            char msg[BUF_SIZE];
+            snprintf(msg, sizeof(msg), "%d|%s s'est deconnecte. Defi annule.", MENU, client->name);
+            send(autre->sock, msg, strlen(msg), 0);
+            autre->etat = MENU;
+         }
+      }
    }
 }

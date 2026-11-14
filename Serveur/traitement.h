@@ -59,5 +59,6 @@ void traiter_historique(Client *client, char *buffer);
 void traiter_replay(Client *client, char *buffer);
 void traiter_replay(Client *client, char *buffer);
 void traiter_classement(Client *client, char *buffer);
+void gerer_deconnexion(Client *client, Client clients[], int actual);
 
 #endif /* guard */

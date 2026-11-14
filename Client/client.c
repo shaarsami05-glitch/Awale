@@ -2,8 +2,11 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#include <signal.h>
 
 #include "client.h"
+
+static SOCKET global_sock = INVALID_SOCKET;
 
 static void init(void)
 {
@@ -25,9 +28,24 @@ static void end(void)
 #endif
 }
 
+
+static void handle_sigint(int sig)
+{
+   (void)sig;
+   if (global_sock != INVALID_SOCKET)
+   {
+      closesocket(global_sock);
+   }
+   printf("\nDeconnexion...\n");
+   exit(EXIT_SUCCESS);
+}
+
 static void app(const char *address, const char *name)
 {
    SOCKET sock = init_connection(address);
+   global_sock = sock;
+   signal(SIGINT, handle_sigint);
+
    char buffer[BUF_SIZE];
 
    fd_set rdfs;
@@ -116,7 +134,7 @@ static void app(const char *address, const char *name)
             printf("Server disconnected !\n");
             break;
          }
-         puts(buffer);
+         //puts(buffer);
       }
    }
 
@@ -251,6 +269,11 @@ static int read_server(SOCKET sock, char *buffer)
       }
    }
 
+   else
+   {
+      // afficher les messages sans numero |
+      printf("%s\n", buffer);
+   }
    return n;
 }
 
