@@ -395,10 +395,26 @@ void serializerPlateau(Plateau plateau, char *joueurNord, char *joueurSud, char 
              plateau.scoreNord, plateau.scoreSud, joueurNord, joueurSud);
 }
 
-// int main()
-// {
-//     lancerJeu();
-//     return 0;
-// }
+Plateau construirePlateauEtape(const Partie *partie, int etape)
+{
+    Plateau plateau;
+    for (int k = 0; k < 6; k++)
+    {
+        plateau.nord[k] = 4;
+        plateau.sud[k] = 4;
+    }
+    plateau.scoreNord = 0;
+    plateau.scoreSud = 0;
 
-// cd /mnt/c/Users/shaar/OneDrive/Documents/INSA/4A/Awale/bin
+    if (etape > partie->nbCoups)
+        etape = partie->nbCoups;
+
+    for (int i = 0; i < etape; i++)
+    {
+        int coordonnees[2];
+        convertis(coordonnees, partie->coups[i]);
+        plateau = deplacerGraines(coordonnees, plateau);
+    }
+
+    return plateau;
+}

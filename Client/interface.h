@@ -54,8 +54,6 @@ void afficherSpectateur(char *donnees);
 void afficherSelfProfil(char *donnees);
 void afficherListeAmis(char* donnees);
 void afficherHistorique(char *donnees);
-
-
-
+void afficherReplay(char *donnees);
 
 #endif /* guard */

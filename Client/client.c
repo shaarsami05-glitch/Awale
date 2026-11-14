@@ -240,6 +240,9 @@ static int read_server(SOCKET sock, char *buffer)
       case 14:
          afficherHistorique(donnees);
          break;
+      case 15:
+         afficherReplay(donnees);
+         break;
 
       default:
          printf("Erreur : %s\n", donnees);

@@ -41,5 +41,6 @@ void nourrirAdversaire(Plateau plateau, int joueur);
 void lancerJeu();
 void serializerPlateau(Plateau plateau, char* joueurNord, char* joueurSud, char *buffer);
 void jouerCoup(Partie *partie, char *buffer, int joueur, int *erreur);
+Plateau construirePlateauEtape(const Partie *partie, int etape);
 
 #endif
