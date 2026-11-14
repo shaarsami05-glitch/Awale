@@ -5,7 +5,6 @@
 
 #include "traitement.h"
 #include "basedonnees.h"
-// #include "serveur.h"
 
 void traiter_message(Client clients[], int actual, int indice, char *buffer)
 {
@@ -388,7 +387,15 @@ void traiter_en_partie(Client *client, char *buffer, Client clients[], int actua
 
    // Sinon, il s'agit d'un coup normal
    int erreur = 0;
+   char coupJoue = buffer[0];
    jouerCoup(partie, buffer, joueur, &erreur);
+
+   if (erreur == 0 && partie->nbCoups < MAX_COUPS - 1)
+   {
+      partie->coups[partie->nbCoups++] = coupJoue;
+      partie->coups[partie->nbCoups] = '\0';
+   }
+   printf("Historique partie %d (%d coups) : %s\n", partie->id, partie->nbCoups, partie->coups);
 
    if (!partie->statut)
    {

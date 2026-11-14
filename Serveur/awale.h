@@ -1,7 +1,7 @@
 #ifndef AWALE_H
 #define AWALE_H
+#define MAX_COUPS 256
 
-// #include "basedonnees.h"
 #include "client.h"
 
 typedef struct
@@ -24,6 +24,10 @@ typedef struct
     Plateau plateau;
     Client *joueurNord;
     Client *joueurSud;
+    char nomNord[32];
+    char nomSud[32];
+    char coups[MAX_COUPS]; // historique des coups (ex: "aBfC...")
+    int nbCoups; 
     int joueur; // A qui le tour
     Statut statut;
 } Partie;
