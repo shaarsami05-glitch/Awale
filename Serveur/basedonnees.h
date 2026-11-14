@@ -33,6 +33,7 @@ typedef struct in_addr IN_ADDR;
 #define MAX_PARTIES 100
 
 #define BUF_SIZE 1024
+#define FICHIER_HISTORIQUE "historique_parties.txt"
 
 #include "client.h"
 #include "traitement.h"
@@ -42,5 +43,7 @@ Partie *initialiserPartie(Client *joueurA, Client *joueurB);
 Partie *getPartieParId(int id);
 int getPartiesEnCours(Partie** partiesEnCours);
 int getPartiesTermineesJoueur(const char *nomJoueur, Partie **partiesJoueur);
+void sauvegarderPartieFichier(const Partie *partie);
+void chargerPartiesFichier(void);
 
 #endif /* guard */

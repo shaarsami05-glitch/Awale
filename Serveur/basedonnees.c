@@ -34,6 +34,7 @@ Partie *initialiserPartie(Client *joueurA, Client *joueurB)
     partie->nomSud[sizeof(partie->nomSud) - 1] = '\0';
     partie->nbCoups = 0;
     partie->coups[0] = '\0';
+    partie->gagnant[0] = '\0';
 
     partie->joueur = rand() % 2; // Détermine aléatoirement le joueur qui commence
     partie->statut = EN_COURS;

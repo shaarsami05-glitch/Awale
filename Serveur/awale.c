@@ -11,7 +11,6 @@
 void convertis(int *res, char lettre)
 // permet de faire l'équivalence entre la lettre et l'indice du plateau
 {
-    // printf("Appel convertis\n");
     if (lettre >= 'a' && lettre <= 'f')
     {
         res[0] = 0;
@@ -40,7 +39,6 @@ Plateau deplacerGraines(int *coordonnees, Plateau plateau)
     // Joueur Sud
     if (coordonnees[0])
     {
-        printf("Sud\n");
         int nbGraines = sud[coordonnees[1]];
         sud[coordonnees[1]] = 0;
         while (nbGraines > 0)
@@ -75,7 +73,6 @@ Plateau deplacerGraines(int *coordonnees, Plateau plateau)
     // Joueur Nord
     else
     {
-        printf("Nord\n");
         int nbGraines = nord[coordonnees[1]];
         nord[coordonnees[1]] = 0;
         while (nbGraines > 0)
@@ -162,7 +159,6 @@ void nourrirAdversaire(Plateau plateau, int joueur)
     if (coupImpossible)
     {
         // Partie s'arrete
-        printf("coupImpossible");
         for (int j = 0; j < 6; j++)
         {
             plateau.scoreSud += plateau.sud[j];
@@ -188,7 +184,6 @@ void jouerCoup(Partie *partie, char *buffer, int joueur, int *erreur)
     // Une seule lettre
     if (buffer[1] != '\0')
     {
-        printf("buffer 1 : %c\n", buffer[1]);
         *erreur = 1;
         strcpy(buffer, "Ecrire une seule lettre svp");
         return;
@@ -237,17 +232,48 @@ void jouerCoup(Partie *partie, char *buffer, int joueur, int *erreur)
     // Enregistrer le nouveau plateau
     partie->plateau = plateau;
 
-    // verifier si un joueur a gagné
-    if (plateau.scoreNord > 24 || plateau.scoreSud > 24)
+    // Changer de joueur pour le tour suivant
+    int prochainJoueur = (partie->joueur + 1) % 2;
+    partie->joueur = prochainJoueur;
+
+    // Vérifier si le prochain joueur est bloqué (plus de graines ou impossible de nourrir)
+    if (plateau.scoreNord < 25 && plateau.scoreSud < 25 &&
+        !(plateau.scoreNord == 24 && plateau.scoreSud == 24) &&
+        !peutJouer(plateau, prochainJoueur))
     {
-        partie->statut = 0;
-        strcpy(buffer, "Partie Terminee !");
+        // Chaque joueur récupère les graines restantes de son camp
+        for (int k = 0; k < 6; k++)
+        {
+            plateau.scoreNord += plateau.nord[k];
+            plateau.nord[k] = 0;
+            plateau.scoreSud += plateau.sud[k];
+            plateau.sud[k] = 0;
+        }
+        partie->plateau = plateau;
+        partie->statut = TERMINEE;
     }
-    // changer de joueur
-    partie->joueur = (partie->joueur + 1) % 2;
+
+    // Vérifier les conditions de victoire ou d'égalité
+    if (plateau.scoreNord >= 25 || plateau.scoreSud >= 25 ||
+        (plateau.scoreNord == 24 && plateau.scoreSud == 24) ||
+        partie->statut == TERMINEE)
+    {
+        partie->statut = TERMINEE;
+        if (plateau.scoreNord > plateau.scoreSud)
+        {
+            strcpy(partie->gagnant, partie->nomNord);
+        }
+        else if (plateau.scoreSud > plateau.scoreNord)
+        {
+            strcpy(partie->gagnant, partie->nomSud);
+        }
+        else
+        {
+            strcpy(partie->gagnant, "EGALITE");
+        }
+    }
 
     strcpy(buffer, "Coup valide !");
-    printf("FIN JouerCoup : %s\n", buffer);
 }
 
 void serializerPlateau(Plateau plateau, char *joueurNord, char *joueurSud, char *buffer)
@@ -284,4 +310,22 @@ Plateau construirePlateauEtape(const Partie *partie, int etape)
     }
 
     return plateau;
+}
+
+int peutJouer(Plateau plateau, int joueur)
+{
+    for (int i = 0; i < 6; i++)
+    {
+        int graines = (joueur == 0) ? plateau.nord[i] : plateau.sud[i];
+        if (graines > 0)
+        {
+            int coord[2] = {joueur, i};
+            Plateau copie = deplacerGraines(coord, plateau);
+            if (!estAffame(copie, joueur))
+            {
+                return 1; // Au moins un coup valide existe
+            }
+        }
+    }
+    return 0; // Aucun coup possible
 }

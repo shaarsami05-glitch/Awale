@@ -90,7 +90,6 @@ void traiter_menu(Client *client, char *buffer, Client clients[], int actual)
 
       client->etat = LISTE_CLIENTS;
       construire_liste_clients(client, clients, actual, buffer);
-      printf("serv : %s\n", buffer);
    }
    else if (strcmp(buffer, "2") == 0)
    {
@@ -122,7 +121,6 @@ void traiter_menu(Client *client, char *buffer, Client clients[], int actual)
    }
    else if (strcmp(buffer, "3") == 0)
    {
-      printf("DEBUG : entrée dans le chat\n");
       client->etat = CHAT;
       snprintf(buffer, BUF_SIZE, "%d|%s", CHAT, "Bienvenue dans le chat. Entrez \"exit\" pour quitter.");
    }
@@ -199,7 +197,6 @@ void traiter_profil(Client *client, char *buffer, Client clients[], int indice, 
    //  ("3. Chat\n");
    //  ("0. Retour\n");
    //  ("==============================\n");
-   printf("PROFIL buffer : %s\n", buffer);
    if (strcmp(buffer, "1") == 0)
    {
       if (clients[client->adversaire].etat == EN_PARTIE || clients[client->adversaire].etat == PROPOSITION_DEFI || clients[client->adversaire].etat == EN_ATTENTE_DEFI)
@@ -329,8 +326,6 @@ void traiter_en_partie(Client *client, char *buffer, Client clients[], int actua
       return;
    }
 
-   printf("partie : %d\n", partie->id);
-
    int joueur;
    if (client->sock == partie->joueurNord->sock)
    {
@@ -348,7 +343,6 @@ void traiter_en_partie(Client *client, char *buffer, Client clients[], int actua
       // Récupérer le type
       *separateur = '\0';
       char *type = buffer;
-      printf("Type : %s\n", type);
 
       if (strcmp(type, "MESSAGE") == 0)
       {
@@ -371,29 +365,21 @@ void traiter_en_partie(Client *client, char *buffer, Client clients[], int actua
       }
       else if (strcmp(type, "EXIT") == 0)
       {
-         Client *adversaire;
+         Client *adversaire = (joueur == 0) ? partie->joueurSud : partie->joueurNord;
 
-         if (joueur == 0)
-            adversaire = partie->joueurSud;
-         else
-            adversaire = partie->joueurNord;
+         // L'adversaire gagne par forfait
+         strcpy(partie->gagnant, adversaire->name);
+         partie->statut = TERMINEE;
 
-         // Informer l'adversaire et lui afficher le menu
          char msg[BUF_SIZE];
-
-         snprintf(msg, sizeof(msg), "%d|%s a quitté la partie. Retour au menu.", MENU, client->name);
-
+         snprintf(msg, sizeof(msg), "%d|%s a quitte la partie (forfait). Retour au menu.", MENU, client->name);
          send(adversaire->sock, msg, strlen(msg), 0);
-         // Terminer la partie
-         partie->statut = 0;
 
-         // Retour au menu pour les deux joueurs
+         // Retour au menu principal
          client->etat = MENU;
          adversaire->etat = MENU;
 
-         // Retour au menu du joueur qui quitte
          construire_menu(buffer);
-
          return;
       }
       else
@@ -403,67 +389,75 @@ void traiter_en_partie(Client *client, char *buffer, Client clients[], int actua
    }
 
    // Sinon, il s'agit d'un coup normal
-   int erreur = 0;
    char coupJoue = buffer[0];
+   int erreur = 0;
    jouerCoup(partie, buffer, joueur, &erreur);
 
-   if (erreur == 0 && partie->nbCoups < MAX_COUPS - 1)
+   if (erreur)
+   {
+      envoyerPlateau(client->sock, buffer, 1, 1);
+      buffer[0] = '\0';
+      return;
+   }
+
+   // coup valide, on l'enregistre dans l'historique
+   if (partie->nbCoups < MAX_COUPS - 1)
    {
       partie->coups[partie->nbCoups++] = coupJoue;
       partie->coups[partie->nbCoups] = '\0';
    }
 
-   if (!partie->statut)
+   char plateauStr[256];
+   serializerPlateau(partie->plateau, partie->nomNord, partie->nomSud, plateauStr);
+
+   // Cas 1 : La partie vient de se terminer
+   if (partie->statut == TERMINEE)
    {
-      // Partie Terminee
-      // Ajouter status fin de partie ? Rejouer...
-      // RENVOYER LE PLATEAU
+      Client *adversaire = (joueur == 0) ? partie->joueurSud : partie->joueurNord;
 
-      // Mettre fin à la partie
-      partie->statut = 0;
+      // Notifier les spectateurs et les remettre au MENU
+      for (int i = 0; i < actual; i++)
+      {
+         if (clients[i].etat == SPECTATEUR && clients[i].partie == partie->id)
+         {
+            char msgSpec[BUF_SIZE];
+            snprintf(msgSpec, sizeof(msgSpec), "16|%s|%s", partie->gagnant, plateauStr);
+            send(clients[i].sock, msgSpec, strlen(msgSpec), 0);
+            clients[i].etat = MENU;
+         }
+      }
 
+      // Envoyer l'écran de fin de partie à l'adversaire
+      char msgAdv[BUF_SIZE];
+      snprintf(msgAdv, sizeof(msgAdv), "16|%s|%s", partie->gagnant, plateauStr);
+      send(adversaire->sock, msgAdv, strlen(msgAdv), 0);
+
+      // Remettre les deux joueurs au MENU
       client->etat = MENU;
-      clients[client->adversaire].etat = MENU;
+      adversaire->etat = MENU;
 
-      construire_menu(buffer);
-
-      char message[BUF_SIZE];
-      construire_menu(message);
-
-      send(clients[client->adversaire].sock, message, strlen(message), 0);
-
+      // Envoyer l'écran de fin de partie au joueur qui vient de jouer
+      snprintf(buffer, BUF_SIZE, "16|%s|%s", partie->gagnant, plateauStr);
       return;
    }
 
-   //  Erreur de saisie
-   if (erreur)
-   {
-      envoyerPlateau(client->sock, buffer, 1, 1); // 1 si erreur et 1 si doitJouer
-      return;
-   }
-
-   serializerPlateau(partie->plateau, partie->joueurNord->name, partie->joueurSud->name, buffer);
-   // contient seulement "4,4,4,4,4,4|4,4,4,4,4,4|0|0"
-
-   // Envoyer le plateau aux Spectateurs de la partie
+   // Cas 2 : La partie continue
    for (int i = 0; i < actual; i++)
    {
       if (clients[i].etat == SPECTATEUR && clients[i].partie == partie->id)
       {
-         char msgSpec[256];
-         snprintf(msgSpec, sizeof(msgSpec), "%d|%s \n", SPECTATEUR, buffer);
+         char msgSpec[BUF_SIZE];
+         snprintf(msgSpec, sizeof(msgSpec), "%d|%s", SPECTATEUR, plateauStr);
          send(clients[i].sock, msgSpec, strlen(msgSpec), 0);
       }
    }
 
    if (joueur)
-      envoyerPlateau(partie->joueurNord->sock, buffer, partie->joueur == 0, 0); // 1 si c'est à Nord
+      envoyerPlateau(partie->joueurNord->sock, plateauStr, partie->joueur == 0, 0);
    else
-      envoyerPlateau(partie->joueurSud->sock, buffer, partie->joueur == 1, 0); // 1 si c'est à Sud
+      envoyerPlateau(partie->joueurSud->sock, plateauStr, partie->joueur == 1, 0);
 
-   char message[100];
-   snprintf(message, sizeof(message), "%d|%d|%d|%s \n", EN_PARTIE, 0, 0, buffer);
-   strcpy(buffer, message);
+   snprintf(buffer, BUF_SIZE, "%d|%d|%d|%s", EN_PARTIE, 0, 0, plateauStr);
 }
 
 void traiter_chat(Client *client, char *buffer, Client clients[], int actual)

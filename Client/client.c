@@ -237,6 +237,10 @@ static int read_server(SOCKET sock, char *buffer)
          afficherReplay(donnees);
          break;
 
+      case 16:
+         afficherFinPartie(donnees);
+         break;
+
       default:
          printf("Erreur : %s\n", donnees);
          break;

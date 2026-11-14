@@ -26,6 +26,7 @@ typedef struct
     Client *joueurSud;
     char nomNord[32];
     char nomSud[32];
+    char gagnant[32];
     char coups[MAX_COUPS]; // historique des coups (ex: "aBfC...")
     int nbCoups; 
     int joueur; // A qui le tour
@@ -39,5 +40,6 @@ void nourrirAdversaire(Plateau plateau, int joueur);
 void serializerPlateau(Plateau plateau, char* joueurNord, char* joueurSud, char *buffer);
 void jouerCoup(Partie *partie, char *buffer, int joueur, int *erreur);
 Plateau construirePlateauEtape(const Partie *partie, int etape);
+int peutJouer(Plateau plateau, int joueur);
 
 #endif

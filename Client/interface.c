@@ -386,3 +386,34 @@ void afficherReplay(char *donnees)
         printf("==============================\n");
     }
 }
+
+void afficherFinPartie(char *donnees)
+{
+    char gagnant[64];
+    char reste[800] = "";
+
+    if (sscanf(donnees, "%63[^|]|%799[^\n]", gagnant, reste) == 2)
+    {
+        Plateau p = {0};
+        char joueurNord[100];
+        char joueurSud[100];
+        if (deserializerPlateau(reste, &p, joueurNord, joueurSud))
+        {
+            afficherJeu(p, joueurNord, joueurSud);
+        }
+
+        printf("====================================================\n");
+        printf("                  FIN DE LA PARTIE                  \n");
+        if (strcmp(gagnant, "EGALITE") == 0)
+        {
+            printf("  Resultat : MATCH NUL (EGALITE) !\n");
+        }
+        else
+        {
+            printf("  Vainqueur : %s !\n", gagnant);
+        }
+        printf("====================================================\n\n");
+
+        afficherMenuConnecte();
+    }
+}
