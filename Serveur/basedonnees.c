@@ -158,3 +158,97 @@ void chargerPartiesFichier(void)
     printf("Historique charge : %d partie(s) recuperee(s).\n", nbParties);
 }
 
+static int trouverOuAjouterJoueur(StatsJoueur *tab, int *nb, int max, const char *nom)
+{
+    for (int i = 0; i < *nb; i++)
+    {
+        if (strcmp(tab[i].nom, nom) == 0)
+            return i;
+    }
+    if (*nb >= max)
+        return -1;
+
+    memset(&tab[*nb], 0, sizeof(StatsJoueur));
+    strncpy(tab[*nb].nom, nom, sizeof(tab[*nb].nom) - 1);
+    return (*nb)++;
+}
+
+int calculerClassement(StatsJoueur *classement, int maxJoueurs)
+{
+    int nbJoueurs = 0;
+
+    for (int i = 0; i < nbParties; i++)
+    {
+        if (parties[i].statut != TERMINEE)
+            continue;
+
+        int idxNord = trouverOuAjouterJoueur(classement, &nbJoueurs, maxJoueurs, parties[i].nomNord);
+        int idxSud = trouverOuAjouterJoueur(classement, &nbJoueurs, maxJoueurs, parties[i].nomSud);
+
+        if (idxNord != -1)
+            classement[idxNord].grainesTotal += parties[i].plateau.scoreNord;
+        if (idxSud != -1)
+            classement[idxSud].grainesTotal += parties[i].plateau.scoreSud;
+
+        if (strcmp(parties[i].gagnant, "EGALITE") == 0)
+        {
+            if (idxNord != -1)
+            {
+                classement[idxNord].egalites++;
+                classement[idxNord].points += 1;
+            }
+            if (idxSud != -1)
+            {
+                classement[idxSud].egalites++;
+                classement[idxSud].points += 1;
+            }
+        }
+        else if (strcmp(parties[i].gagnant, parties[i].nomNord) == 0)
+        {
+            if (idxNord != -1)
+            {
+                classement[idxNord].victoires++;
+                classement[idxNord].points += 3;
+            }
+            if (idxSud != -1)
+            {
+                classement[idxSud].defaites++;
+            }
+        }
+        else if (strcmp(parties[i].gagnant, parties[i].nomSud) == 0)
+        {
+            if (idxSud != -1)
+            {
+                classement[idxSud].victoires++;
+                classement[idxSud].points += 3;
+            }
+            if (idxNord != -1)
+            {
+                classement[idxNord].defaites++;
+            }
+        }
+    }
+
+    // Tri à bulles décroissant par points, puis par grainesTotal
+    for (int i = 0; i < nbJoueurs - 1; i++)
+    {
+        for (int j = 0; j < nbJoueurs - 1 - i; j++)
+        {
+            int doitEchanger = 0;
+            if (classement[j].points < classement[j + 1].points)
+                doitEchanger = 1;
+            else if (classement[j].points == classement[j + 1].points &&
+                     classement[j].grainesTotal < classement[j + 1].grainesTotal)
+                doitEchanger = 1;
+
+            if (doitEchanger)
+            {
+                StatsJoueur tmp = classement[j];
+                classement[j] = classement[j + 1];
+                classement[j + 1] = tmp;
+            }
+        }
+    }
+
+    return nbJoueurs;
+}

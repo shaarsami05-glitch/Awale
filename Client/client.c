@@ -241,6 +241,10 @@ static int read_server(SOCKET sock, char *buffer)
          afficherFinPartie(donnees);
          break;
 
+      case 17:
+         afficherClassement(donnees);
+         break;
+
       default:
          printf("Erreur : %s\n", donnees);
          break;

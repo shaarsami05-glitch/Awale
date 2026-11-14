@@ -131,6 +131,7 @@ void afficherMenuConnecte()
     printf("2. Voir parties en cours\n");
     printf("3. Chat general\n");
     printf("4. Profil\n");
+    printf("5. Classement\n");
     printf("==============================\n");
 }
 
@@ -416,4 +417,40 @@ void afficherFinPartie(char *donnees)
 
         afficherMenuConnecte();
     }
+}
+
+void afficherClassement(char *donnees)
+{
+    printf("====================== CLASSEMENT ======================\n");
+
+    if (strlen(donnees) == 0)
+    {
+        printf("Aucune partie terminee pour etablir un classement.\n");
+    }
+    else
+    {
+        printf("Rang | Joueur          | Pts |  V |  N |  D | Graines\n");
+        printf("-----+-----------------+-----+----+----+----+--------\n");
+
+        char copie[BUF_SIZE];
+        strncpy(copie, donnees, sizeof(copie) - 1);
+        copie[sizeof(copie) - 1] = '\0';
+
+        char *ligne = strtok(copie, "|");
+        while (ligne != NULL)
+        {
+            int rang, pts, v, n, d, graines;
+            char nom[32];
+            if (sscanf(ligne, "%d;%31[^;];%d;%d;%d;%d;%d",
+                       &rang, nom, &pts, &v, &n, &d, &graines) == 7)
+            {
+                printf(" #%-2d | %-15s | %3d | %2d | %2d | %2d | %4d\n",
+                       rang, nom, pts, v, n, d, graines);
+            }
+            ligne = strtok(NULL, "|");
+        }
+    }
+
+    printf("========================================================\n");
+    printf("0. Retour\n");
 }

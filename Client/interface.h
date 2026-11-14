@@ -55,5 +55,6 @@ void afficherListeAmis(char* donnees);
 void afficherHistorique(char *donnees);
 void afficherReplay(char *donnees);
 void afficherFinPartie(char *donnees);
+void afficherClassement(char *donnees);
 
 #endif /* guard */

@@ -58,5 +58,6 @@ void retourSelfProfil(Client *client, char *buffer);
 void traiter_historique(Client *client, char *buffer);
 void traiter_replay(Client *client, char *buffer);
 void traiter_replay(Client *client, char *buffer);
+void traiter_classement(Client *client, char *buffer);
 
 #endif /* guard */

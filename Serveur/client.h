@@ -21,7 +21,9 @@ typedef enum
     BIO = 12,
     AMIS = 13,
     HISTORIQUE = 14,
-    REPLAY = 15
+    REPLAY = 15,
+    FIN_PARTIE = 16,
+    CLASSEMENT = 17
 } EtatClient;
 
 typedef struct

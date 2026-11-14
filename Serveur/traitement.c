@@ -39,6 +39,7 @@ void traiter_message(Client clients[], int actual, int indice, char *buffer)
    case SPECTATEUR:
       traiter_spectateur(client, buffer);
       break;
+
    case CHAT:
       traiter_chat(client, buffer, clients, actual);
       break;
@@ -71,8 +72,12 @@ void traiter_message(Client clients[], int actual, int indice, char *buffer)
       traiter_replay(client, buffer);
       break;
 
-   default: // afficher le MENU par defaut
-      traiter_menu(client, buffer, clients, actual);
+   case FIN_PARTIE:
+      // Rien à faire
+      break;
+
+   case CLASSEMENT:
+      traiter_classement(client, buffer);
       break;
    }
 }
@@ -83,6 +88,7 @@ void traiter_menu(Client *client, char *buffer, Client clients[], int actual)
 //  printf("2. Voir parties en cours\n");
 //  printf("3. Chat general\n");
 //  printf("4. Profil\n");
+//  printf("5. Classement\n");
 //  printf("==============================\n");
 {
    if (strcmp(buffer, "1") == 0)
@@ -128,6 +134,29 @@ void traiter_menu(Client *client, char *buffer, Client clients[], int actual)
    {
       client->etat = SELF_PROFIL;
       snprintf(buffer, BUF_SIZE, "%d|%d|%s", SELF_PROFIL, client->prive, client->bio);
+   }
+   else if (strcmp(buffer, "5") == 0)
+   {
+      client->etat = CLASSEMENT;
+      snprintf(buffer, BUF_SIZE, "%d|", CLASSEMENT);
+
+      StatsJoueur classement[MAX_CLIENTS];
+      int nb = calculerClassement(classement, MAX_CLIENTS);
+
+      for (int i = 0; i < nb; i++)
+      {
+         char ligne[128];
+         // Format par joueur : rang;nom;points;V;N;D;graines|
+         snprintf(ligne, sizeof(ligne), "%d;%s;%d;%d;%d;%d;%d|",
+                  i + 1,
+                  classement[i].nom,
+                  classement[i].points,
+                  classement[i].victoires,
+                  classement[i].egalites,
+                  classement[i].defaites,
+                  classement[i].grainesTotal);
+         strncat(buffer, ligne, BUF_SIZE - strlen(buffer) - 1);
+      }
    }
    else
    {
@@ -811,4 +840,13 @@ void traiter_replay(Client *client, char *buffer)
    }
 
    construireMessageReplay(client, p, buffer);
+}
+
+void traiter_classement(Client *client, char *buffer)
+{
+   if (strcmp(buffer, "0") == 0)
+   {
+      client->etat = MENU;
+      construire_menu(buffer);
+   }
 }

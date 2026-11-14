@@ -39,11 +39,22 @@ typedef struct in_addr IN_ADDR;
 #include "traitement.h"
 #include "awale.h"
 
+typedef struct
+{
+    char nom[32];
+    int victoires;
+    int egalites;
+    int defaites;
+    int points;       // 3 pts victoire, 1 pt nul, 0 pt défaite
+    int grainesTotal; // Cumul des graines capturées (départage)
+} StatsJoueur;
+
 Partie *initialiserPartie(Client *joueurA, Client *joueurB);
 Partie *getPartieParId(int id);
 int getPartiesEnCours(Partie** partiesEnCours);
 int getPartiesTermineesJoueur(const char *nomJoueur, Partie **partiesJoueur);
 void sauvegarderPartieFichier(const Partie *partie);
 void chargerPartiesFichier(void);
+int calculerClassement(StatsJoueur *classement, int maxJoueurs);
 
 #endif /* guard */
