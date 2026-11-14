@@ -1,11 +1,30 @@
-# Awale
+# Awalé en Réseau (C / Sockets TCP)
 
-Plateau : La partie se joue sur le plateau de 2×6 trous.
-Greniers : Si votre awalé contient deux greniers (trous plus grands à chacune des deux extrémités) alors ils ne comptent pas comme des trous, ils ne servent qu’à ranger les graines des joueurs. Le grenier d’un joueur se situant à sa droite.
-Jouer un coup : Le 1er joueur prend toutes les graines de l’un des 6 trous se trouvant de son côté et en dépose une dans chaque trou suivant celui qu’il a vidé.
-Sens de la partie : antihoraire.
-Capture : si la dernière graine est déposée dans un trou de l’adversaire comportant déjà 1 ou 2 graines, le joueur capture les 2 ou 3 graines résultantes. Les graines capturées sont alors sorties du jeu (grenier) et le trou est laissé vide.
-–> Rafle : Lorsqu’un joueur s’empare de 2 ou 3 graines, si la case précédente contient également 2 ou 3 graines, elles sont capturées aussi et ainsi de suite.
-Boucle : Si le nombre de graines prises dans un trou de départ est supérieur à 11, cela fait que l’on va boucler un tour, auquel cas, à chaque passage, la case de départ est sautée et donc toujours laissée vide.
-Affamer : Un joueur n’a pas le droit de jouer un coup qui prenne toutes les graines du camp adverse.
-Fin du jeu : le jeu se termine lorsqu’un joueur n’a plus de graines dans son camp (et ne peut donc plus jouer). L’adversaire capture alors les graines restantes.
+Implémentation client-serveur du jeu traditionnel **Awalé** en C, permettant à plusieurs joueurs de s'affronter en temps réel, de discuter, d'observer des parties et de revoir leurs anciens matchs.
+
+---
+
+## Fonctionnalités
+
+* **Jeu d'Awalé complet** : semis, captures, gestion de la famine, victoire à 25 graines, égalité (24–24) et forfait en cas d'abandon ou de déconnexion.
+* **Multijoueur & Social** : liste des joueurs connectés, défis entre joueurs, profil personnalisé (bio, mode privé), liste d'amis et chat général ou privé en partie.
+* **Mode Spectateur** : possibilité d'observer les parties publiques (ou privées entre amis) en direct.
+* **Historique & Replay** : sauvegarde automatique des parties terminées dans `historique_parties.txt` et relecture coup par coup depuis le profil.
+* **Classement** : calcul dynamique des scores (3 pts victoire, 1 pt nul, 0 pt défaite) et départage au nombre total de graines capturées.
+
+---
+
+## Structure du projet
+
+```text
+├── Serveur/
+│   ├── serveur.c / .h        # Gestion des sockets TCP et boucle select()
+│   ├── traitement.c / .h     # Logique des états clients et protocole réseau
+│   ├── awale.c / .h          # Règles du jeu, semis, captures et fin de partie
+│   ├── basedonnees.c / .h    # Gestion mémoire, persistance fichier et classement
+│   └── client.h              # Structure Client et énumération des états
+├── Client/
+│   ├── client.c / .h         # Connexion au serveur et écoute des entrées
+│   ├── interface.c / .h      # Affichage console (plateau, menus, replay, classement)
+│   └── awale.h               # Structures partagées du plateau
+└── historique_parties.txt    # Fichier de sauvegarde généré par le serveur
