@@ -237,6 +237,9 @@ static int read_server(SOCKET sock, char *buffer)
       case 13:
          afficherListeAmis(donnees);
          break;
+      case 14:
+         afficherHistorique(donnees);
+         break;
 
       default:
          printf("Erreur : %s\n", donnees);

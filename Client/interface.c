@@ -282,6 +282,7 @@ void afficherSelfProfil(char *donnees)
             printf("(prive)\n");
         else
             printf("(public)\n");
+        printf("4. Historique des parties\n");
 
         printf("0. Retour\n");
         printf("==============================\n");
@@ -308,4 +309,25 @@ void afficherListeAmis(char* donnees)
     printf("0. Retour\n");
     printf("==============================\n");
 
+}
+
+void afficherHistorique(char *donnees)
+{
+    printf("===== HISTORIQUE PARTIES =====\n");
+    printf("Choisissez une partie à revoir :\n");
+
+    for (char *p = donnees; *p != '\0'; p++)
+    {
+        if (*p == '|')
+            putchar('\n');
+        else
+            putchar(*p);
+    }
+
+    size_t len = strlen(donnees);
+    if (len > 0 && donnees[len - 1] != '|')
+        putchar('\n');
+
+    printf("0. Retour\n");
+    printf("==============================\n");
 }

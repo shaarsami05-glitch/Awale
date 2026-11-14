@@ -62,6 +62,9 @@ void traiter_message(Client clients[], int actual, int indice, char *buffer)
    case AMIS:
       retourSelfProfil(client, buffer);
       break;
+   case HISTORIQUE:
+      traiter_historique(client, buffer);
+      break;
    }
 }
 
@@ -649,6 +652,32 @@ void traiter_self_profil(Client *client, char *buffer)
       snprintf(buffer, BUF_SIZE, "%d|%s", MENU, msg);
       return;
    }
+   else if (strcmp(buffer, "4") == 0)
+   {
+      client->etat = HISTORIQUE;
+      snprintf(buffer, BUF_SIZE, "%d|", HISTORIQUE);
+
+      Partie *partiesJoueur[MAX_PARTIES];
+      int nb = getPartiesTermineesJoueur(client->name, partiesJoueur);
+
+      if (nb == 0)
+      {
+         strncat(buffer, "Aucune partie jouee.|", BUF_SIZE - strlen(buffer) - 1);
+      }
+      else
+      {
+         for (int i = 0; i < nb; i++)
+         {
+            char ligne[128];
+            snprintf(ligne, sizeof(ligne), "%d. %s (%d) VS %s (%d) |",
+                     i + 1,
+                     partiesJoueur[i]->nomNord, partiesJoueur[i]->plateau.scoreNord,
+                     partiesJoueur[i]->nomSud, partiesJoueur[i]->plateau.scoreSud);
+            strncat(buffer, ligne, BUF_SIZE - strlen(buffer) - 1);
+         }
+      }
+      return;
+   }
 }
 
 void traiter_bio(Client *client, char *buffer)
@@ -699,5 +728,15 @@ void retourSelfProfil(Client *client, char *buffer)
    {
       client->etat = SELF_PROFIL;
       snprintf(buffer, BUF_SIZE, "%d|%d|%s", SELF_PROFIL, client->prive, client->bio);
+   }
+}
+
+void traiter_historique(Client *client, char *buffer)
+{
+   if (strcmp(buffer, "0") == 0)
+   {
+      client->etat = SELF_PROFIL;
+      snprintf(buffer, BUF_SIZE, "%d|%d|%s", SELF_PROFIL, client->prive, client->bio);
+      return;
    }
 }

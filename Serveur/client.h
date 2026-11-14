@@ -19,7 +19,9 @@ typedef enum
     SPECTATEUR = 10, // Spectateur d'une partie
     SELF_PROFIL = 11,
     BIO = 12,
-    AMIS = 13
+    AMIS = 13,
+    HISTORIQUE = 14,
+    REPLAY = 15
 } EtatClient;
 
 typedef struct
@@ -40,6 +42,10 @@ typedef struct
 
     char amis[MAX_AMIS][32]; //liste des noms d'amis
     int nbAmis;
+    
+    // pouvoir revoir une partie
+    int replayPartieId; // ID de la partie en cours de revisionnage
+    int replayEtape;    // Numéro du coup actuel (0 = plateau initial, 1 = après 1er coup, etc.)
 
 } Client;
 
