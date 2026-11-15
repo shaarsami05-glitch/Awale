@@ -181,9 +181,9 @@ void afficherJeu(Plateau plateau, char *joueurNord, char *joueurSud)
     printf("       +------+------+------+------+------+------+ \n");
 
     // Separation centrale
-    printf("       |                                      |\n");
-    printf("       |             PLATEAU AWALÉ            |\n");
-    printf("       |                                      |\n");
+    printf("       |                                         |\n");
+    printf("       |              PLATEAU AWALÉ              |\n");
+    printf("       |                                         |\n");
 
     printf("       +------+------+------+------+------+------+ \n");
 
@@ -450,7 +450,6 @@ void afficherClassement(char *donnees)
             ligne = strtok(NULL, "|");
         }
     }
-
-    printf("========================================================\n");
     printf("0. Retour\n");
+    printf("========================================================\n");
 }

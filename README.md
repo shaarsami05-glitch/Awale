@@ -33,7 +33,7 @@ Implémentation client-serveur du jeu traditionnel **Awalé** en C, permettant �
 ## Compilation et Lancement
 
 ### 1. Compiler le serveur et le client
-Dans chacun des dossiers (`Serveur/` et `Client/`), exécuter :
+A la racine, exécuter :
 ```bash
 make
 ```
@@ -55,6 +55,6 @@ Les pseudos suivant ont des parties pré-enregistré dans le fichier txt (Charli
 | **En partie** | `a` à `f` (Nord) ou `A` à `F` (Sud) | Jouer la case correspondante |
 | **En partie** | `/msg <text>` | Envoyer un message privé à son adversaire |
 | **En partie** | `/exit` (ou Ctrl+C) | Abandonner la partie (victoire par forfait à l'adversaire)|
-| **Replay** | `1` | Passer au coup suivant |
-| **Replay** | `2` | Revenir au coup précédent |
+| **Replay** | `n` | Passer au coup suivant |
+| **Replay** | `p` | Revenir au coup précédent |
 | **Menus** | `0` | Revenir à l'écran précédent ou au menu principal |

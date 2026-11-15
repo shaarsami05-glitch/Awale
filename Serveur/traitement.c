@@ -434,7 +434,10 @@ void traiter_en_partie(Client *client, char *buffer, Client clients[], int actua
 
    if (erreur)
    {
-      envoyerPlateau(client->sock, buffer, 1, 1);
+      if(erreur == 2)
+         envoyerPlateau(client->sock, buffer, 0, 1);
+      else
+         envoyerPlateau(client->sock, buffer, 1, 1);
       buffer[0] = '\0';
       return;
    }

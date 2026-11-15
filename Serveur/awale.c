@@ -174,7 +174,7 @@ void jouerCoup(Partie *partie, char *buffer, int joueur, int *erreur)
     Plateau plateau = partie->plateau;
     if (joueur != partie->joueur)
     {
-        *erreur = 1;
+        *erreur = 2;
         strcpy(buffer, "Ce n'est pas votre tour !\n");
         return;
     }
@@ -225,7 +225,7 @@ void jouerCoup(Partie *partie, char *buffer, int joueur, int *erreur)
         // Restaurer le plateau
         plateau = sauvegardePlateau;
         *erreur = 1;
-        strcpy(buffer, "Adversaire en FAMINE ! Coup invalide ! Veuillez rejouer");
+        strcpy(buffer, "Adversaire en FAMINE ! Coup invalide !");
         return;
     }
 
